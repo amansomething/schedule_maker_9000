@@ -1,0 +1,9 @@
+.idea/
+.git/
+.venv/
+venv/
+*.env
+*.sqlite3
+.gitignore
+.DS_Store
+Dockerfile
