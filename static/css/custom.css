@@ -2,3 +2,15 @@ body {
     margin: 0 auto;
     padding: 20px;
 }
+
+nav {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 150px);
+    gap: 10px;
+}
+
+.nav-button {
+    text-align: center;
+    border: 1px solid black;
+    padding: 5px 10px;
+}
