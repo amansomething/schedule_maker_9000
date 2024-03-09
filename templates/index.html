@@ -2,8 +2,8 @@
 
 {% block content %}
     <nav>
-        <a class="nav-button" href="#">Home</a>
-        <a class="nav-button" href="#">Refresh Data</a>
+        <a class="nav-button" href="{% url 'home' %}">Home</a>
+        <a class="nav-button" href="{% url 'get_data' %}">Get Data</a>
         <a class="nav-button" href="#">Parse Data</a>
     </nav>
     <hr>

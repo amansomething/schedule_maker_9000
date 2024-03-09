@@ -11,6 +11,12 @@
     <link rel="stylesheet" href="{% static 'css/custom.css' %}">
 </head>
 <body>
+{% if message %}
+    <p class="alert">
+        {{ message }}
+    </p>
+{% endif %}
+
 {% block content %}
 {% endblock content %}
 <script src="{% static 'js/custom.js' %}"></script>
