@@ -4,11 +4,19 @@
     <nav>
         <a class="nav-button" href="{% url 'home' %}">Home</a>
         <a class="nav-button" href="{% url 'get_data' %}">Get Data</a>
-        <a class="nav-button" href="#">Parse Data</a>
+        <a class="nav-button" href="{% url 'parse_data' %}">Parse Data</a>
     </nav>
     <hr>
 
     <main>
         <h1>Hello, World!</h1>
+        {% if headings %}
+            <h2>Headings</h2>
+            <ul>
+                {% for heading in headings %}
+                    <li>{{ heading }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
     </main>
 {% endblock content %}
