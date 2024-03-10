@@ -10,7 +10,7 @@
 
     <link rel="stylesheet" href="{% static 'css/custom.css' %}">
 </head>
-<body>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 {% if message %}
     <p class="alert">
         {{ message }}
@@ -19,6 +19,7 @@
 
 {% block content %}
 {% endblock content %}
+<script src="{% static 'js/htmx.min.js' %}"></script>
 <script src="{% static 'js/custom.js' %}"></script>
 </body>
 </html>
