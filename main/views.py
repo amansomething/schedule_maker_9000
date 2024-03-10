@@ -1,3 +1,4 @@
+import os
 from typing import Optional
 
 from django.shortcuts import render
@@ -44,11 +45,6 @@ def get_all_schedule_links() -> list[str]:
         href = link.get('href')
         if href and href.startswith(prefix):
             results.append(BASE_URL + href)
-        # response = httpx.get(link)
-        # file_content_str = str(BeautifulSoup(response.content, 'html.parser'))
-        #
-        # with open(f"{RESULTS_DIR}/{filename}", 'w', encoding='utf-8') as file:
-        #     file.write(file_content_str)
 
     return results
 
@@ -92,9 +88,52 @@ def get_data(request: WSGIRequest) -> render:
 
     context = {
         "message": message,
-        "results": links,
     }
 
+    return render(request, "index.html", context=context)
+
+
+def parse_schedule_data(soup: BeautifulSoup):
+    """
+    Parses the schedule data from the given soup object.
+    """
+    panel_heading = soup.find("div", class_="panel-heading")
+    heading = panel_heading.find("h3").text
+    details = panel_heading.find("p").text
+    day, date = details.split(" - ")
+    date, location = date.split(" in ")
+
+    panel_body = soup.find("div", class_="panel-body")
+    presenters = panel_body.find("li")
+
+    description = soup.find("div", class_="description").text
+
+    print(heading)
+    print(day)
+    print(date)
+    print(location)
+    print(description)
+    print(presenters)
+
+
+def parse_data(request: WSGIRequest) -> render:
+    """
+    Parses the latest schedule data for all files in the results directory.
+    """
+    files = [f for f in os.listdir(RESULTS_DIR) if f.endswith(".html")]
+    current_dir = os.path.abspath(RESULTS_DIR)
+    filename = os.path.join(current_dir, files[0])
+
+    print(filename)
+    soup = read_html_file(filename)
+    parse_schedule_data(soup)
+    # for file in files:
+    #     filename = os.path.join(RESULTS_DIR, file)
+    #     soup = read_html_file(filename)
+    #     print(soup)
+    #     parse_schedule_data(soup)
+
+    context = {}
     return render(request, "index.html", context=context)
 
 
