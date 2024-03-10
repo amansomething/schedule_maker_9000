@@ -28,6 +28,7 @@ def read_html_file(file_path) -> Optional[BeautifulSoup]:
 def get_all_schedule_links() -> list[str]:
     """
     Gets all the schedule links from the main schedule page.
+    Schedule links follow the pattern: /2024/schedule/presentation/{NUMBER}/
 
     :return: A list of schedule links.
     """
@@ -42,12 +43,7 @@ def get_all_schedule_links() -> list[str]:
     for link in soup.find_all('a'):
         href = link.get('href')
         if href and href.startswith(prefix):
-            results.append(href)
-
-    for item in results:
-        link = BASE_URL + item
-        filename = item.split("/")[-2].strip() + ".html"
-        print(f"{link} => {filename}")
+            results.append(BASE_URL + href)
         # response = httpx.get(link)
         # file_content_str = str(BeautifulSoup(response.content, 'html.parser'))
         #
@@ -57,16 +53,42 @@ def get_all_schedule_links() -> list[str]:
     return results
 
 
+def download_schedule_data(links: list[str], output_dir: str = RESULTS_DIR) -> list[str]:
+    """
+    Downloads the schedule data from the given links and saves it to the given directory.
+
+    :param links: The links to the schedule data.
+    :param output_dir: The directory to save the files to.
+    """
+    errors = []
+    for link in links:
+        filename = link.split("/")[-2].strip() + ".html"
+        print(f"Downloading {filename}")
+        response = httpx.get(link)
+
+        if response.status_code != 200:
+            errors.append(link)
+            continue
+
+        file_content_str = str(BeautifulSoup(response.content, 'html.parser'))
+        with open(f"{output_dir}/{filename}", 'w', encoding='utf-8') as file:
+            file.write(file_content_str)
+
+    return errors
+
+
 def get_data(request: WSGIRequest) -> render:
     """
     Gets the latest data from the website and saves the results.
     """
     links = get_all_schedule_links()
+    errors = download_schedule_data(links)
 
-    if links:
-        message = "Latest schedule data downloaded successfully! Ready to parse."
+    if errors:
+        message = errors
+        print(errors)
     else:
-        message = "Error downloading schedule data. Please try again later."
+        message = "Latest schedule data downloaded successfully! Ready to parse."
 
     context = {
         "message": message,

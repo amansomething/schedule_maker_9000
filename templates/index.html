@@ -9,12 +9,11 @@
     <hr>
 
     <main>
-        <h1>Hello, World!</h1>
-        {% if headings %}
-            <h2>Headings</h2>
+        {% if results %}
+            <h2>Results</h2>
             <ul>
-                {% for heading in headings %}
-                    <li>{{ heading }}</li>
+                {% for result in results %}
+                    <li>{{ result }}</li>
                 {% endfor %}
             </ul>
         {% endif %}

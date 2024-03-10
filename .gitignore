@@ -1,6 +1,7 @@
 # Custom
 .DS_Store
 schedule.html
+site_data/*.html
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
