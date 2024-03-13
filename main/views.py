@@ -1,11 +1,15 @@
 import os
+import re
 from typing import Optional
 
+from django.utils import dateparse
 from django.shortcuts import render
 from django.core.handlers.wsgi import WSGIRequest
 
 import httpx
 from bs4 import BeautifulSoup
+
+from .models import Event, Presenter
 
 BASE_URL = "https://us.pycon.org"
 SCHEDULES_URL = f"{BASE_URL}/2024/schedule/"
@@ -93,27 +97,74 @@ def get_data(request: WSGIRequest) -> render:
     return render(request, "index.html", context=context)
 
 
-def parse_schedule_data(soup: BeautifulSoup):
+def parse_schedule_data(soup: BeautifulSoup, event_id: int):
     """
     Parses the schedule data from the given soup object.
+    Adds the data to the database.
+
+    :param soup: The soup object containing the schedule data.
+    :param event_id: The ID of the scheduled event.
     """
+    print(f"Parsing schedule data for: {event_id}.html")
     panel_heading = soup.find("div", class_="panel-heading")
     heading = panel_heading.find("h3").text
     details = panel_heading.find("p").text
-    day, date = details.split(" - ")
-    date, location = date.split(" in ")
+
+    day, details = details.split(" - ")
+    event_time = details.split("2024 ")[1].split(" in")[0]
+    location = details.split("in ")[1]
+    # print("Details:", details)
+    # print('---')
+    # print("Day:", day)
+    # print("Time:", event_time)
+    # print("Location:", location)
+
+    dates = {
+        "Wednesday": "2024-05-15",
+        "Thursday": "2024-05-16",
+        "Friday": "2024-05-17",
+        "Saturday": "2024-05-18",
+        "Sunday": "2024-05-19"
+    }
+
+    date = dates[day]
 
     panel_body = soup.find("div", class_="panel-body")
-    presenters = panel_body.find("li")
+    presenter_details = panel_body.find_all("a", href=re.compile(r"^/2024/speaker/profile"))
+    presenters = []
+    for detail in presenter_details:
+        print("Detail:", detail)
+        presenter_name = detail.text
+        try:
+            presenter_link = detail["href"]
+        except TypeError:
+            continue
+
+        presenter_id = int(presenter_link.split("/")[-2])
+
+        Presenter.objects.get_or_create(
+            id=presenter_id,
+            defaults={
+                "name": presenter_name,
+                "bio": ""
+            }
+        )
+        presenters.append(presenter_id)
 
     description = soup.find("div", class_="description").text
 
-    print(heading)
-    print(day)
-    print(date)
-    print(location)
-    print(description)
-    print(presenters)
+    event, created = Event.objects.get_or_create(
+        id=event_id,
+        defaults={
+            "title": heading,
+            "description": description,
+            "timestamp": dateparse.parse_date(date),
+            "location": location
+        }
+    )
+    # Add the presenters to the event.
+    for presenter_id in presenters:
+        event.presenters.add(presenter_id)
 
 
 def parse_data(request: WSGIRequest) -> render:
@@ -122,16 +173,22 @@ def parse_data(request: WSGIRequest) -> render:
     """
     files = [f for f in os.listdir(RESULTS_DIR) if f.endswith(".html")]
     current_dir = os.path.abspath(RESULTS_DIR)
-    filename = os.path.join(current_dir, files[0])
 
-    print(filename)
-    soup = read_html_file(filename)
-    parse_schedule_data(soup)
-    # for file in files:
-    #     filename = os.path.join(RESULTS_DIR, file)
-    #     soup = read_html_file(filename)
-    #     print(soup)
-    #     parse_schedule_data(soup)
+    # filename = os.path.join(current_dir, files[0])
+
+    # print(filename)
+    # filename = "/code/site_data/20.html"
+    # soup = read_html_file(filename)
+    # parse_schedule_data(soup, event_id)
+    for file in files:
+        filename = os.path.join(current_dir, file)
+        try:
+            event_id = int(file.split(".html")[0])
+        except ValueError:
+            event_id = 0
+
+        soup = read_html_file(filename)
+        parse_schedule_data(soup, event_id)
 
     context = {}
     return render(request, "index.html", context=context)
