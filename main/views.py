@@ -171,6 +171,10 @@ def parse_data(request: WSGIRequest) -> render:
     """
     Parses the latest schedule data for all files in the results directory.
     """
+    # Clear out the existing tables
+    Event.objects.all().delete()
+    Presenter.objects.all().delete()
+
     files = [f for f in os.listdir(RESULTS_DIR) if f.endswith(".html")]
     current_dir = os.path.abspath(RESULTS_DIR)
 
