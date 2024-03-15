@@ -1,6 +1,8 @@
 import os
 import re
 from typing import Optional
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from django.utils import dateparse
 from django.shortcuts import render
@@ -97,6 +99,52 @@ def get_data(request: WSGIRequest) -> render:
     return render(request, "index.html", context=context)
 
 
+def get_timestamps(day_str: str, time_str: str):
+    """
+    Parses the time string and returns the start and end times.
+    Must be within Wed-Sun.
+
+    :param day_str: The date string to parse. Expected format: "Wednesday"
+    :param time_str: The time string to parse. Expected format: "2 p.m.-2:30 p.m."
+    :return:
+    """
+    dates = {
+        "Wednesday": "2024-05-15",
+        "Thursday": "2024-05-16",
+        "Friday": "2024-05-17",
+        "Saturday": "2024-05-18",
+        "Sunday": "2024-05-19"
+    }
+
+    date_str = dates[day_str]
+    date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+
+    start_time_str, end_time_str = tuple(x.upper() for x in time_str.replace(".", "").split("-"))
+    print("Start Time Str:", start_time_str)
+    print("End Time Str:", end_time_str)
+    print("---")
+    try:
+        start_time = datetime.strptime(start_time_str, "%I:%M %p")
+    except ValueError:
+        start_time = datetime.strptime(start_time_str, "%I %p")
+
+    try:
+        end_time = datetime.strptime(end_time_str, "%I:%M %p")
+    except ValueError:
+        end_time = datetime.strptime(end_time_str, "%I %p")
+
+    print("Start Time:", start_time)
+    print("End Time:", end_time)
+
+    start_timestamp = date_obj.replace(hour=start_time.hour, minute=start_time.minute)
+    end_timestamp = date_obj.replace(hour=end_time.hour, minute=end_time.minute)
+
+    print("Start Timestamp:", start_timestamp)
+    print("End Timestamp:", end_timestamp)
+
+    return start_timestamp, end_timestamp
+
+
 def parse_schedule_data(soup: BeautifulSoup, event_id: int):
     """
     Parses the schedule data from the given soup object.
@@ -111,7 +159,8 @@ def parse_schedule_data(soup: BeautifulSoup, event_id: int):
     details = panel_heading.find("p").text
 
     day, details = details.split(" - ")
-    event_time = details.split("2024 ")[1].split(" in")[0]
+    event_times = details.split("2024 ")[1].split(" in")[0]
+
     location = details.split("in ")[1]
     # print("Details:", details)
     # print('---')
@@ -128,6 +177,7 @@ def parse_schedule_data(soup: BeautifulSoup, event_id: int):
     }
 
     date = dates[day]
+    start_time, end_time = get_timestamps(day, event_times)
 
     panel_body = soup.find("div", class_="panel-body")
     presenter_details = panel_body.find_all("a", href=re.compile(r"^/2024/speaker/profile"))
@@ -152,16 +202,18 @@ def parse_schedule_data(soup: BeautifulSoup, event_id: int):
         presenters.append(presenter_id)
 
     description = soup.find("div", class_="description").text
+    timestamp = dateparse.parse_date(date)
 
     event, created = Event.objects.get_or_create(
         id=event_id,
         defaults={
             "title": heading,
             "description": description,
-            "timestamp": dateparse.parse_date(date),
+            "timestamp": timestamp,
             "location": location
         }
     )
+    print(f"Timestamp: {event.timestamp}")
     # Add the presenters to the event.
     for presenter_id in presenters:
         event.presenters.add(presenter_id)
@@ -178,21 +230,20 @@ def parse_data(request: WSGIRequest) -> render:
     files = [f for f in os.listdir(RESULTS_DIR) if f.endswith(".html")]
     current_dir = os.path.abspath(RESULTS_DIR)
 
-    # filename = os.path.join(current_dir, files[0])
-
-    # print(filename)
-    # filename = "/code/site_data/20.html"
-    # soup = read_html_file(filename)
-    # parse_schedule_data(soup, event_id)
-    for file in files:
-        filename = os.path.join(current_dir, file)
-        try:
-            event_id = int(file.split(".html")[0])
-        except ValueError:
-            event_id = 0
-
-        soup = read_html_file(filename)
-        parse_schedule_data(soup, event_id)
+    filename = "/code/site_data/20.html"
+    print(f"Parsing schedule data for: {filename}")
+    soup = read_html_file(filename)
+    event_id = 20
+    parse_schedule_data(soup, event_id)
+    # for file in files:
+    #     filename = os.path.join(current_dir, file)
+    #     try:
+    #         event_id = int(file.split(".html")[0])
+    #     except ValueError:
+    #         event_id = 0
+    #
+    #     soup = read_html_file(filename)
+    #     parse_schedule_data(soup, event_id)
 
     context = {}
     return render(request, "index.html", context=context)
