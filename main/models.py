@@ -14,7 +14,8 @@ class Event(models.Model):
     id = models.IntegerField(primary_key=True)
     title = models.CharField(max_length=255)
     description = models.TextField()
-    timestamp = models.DateTimeField()
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
     presenters = models.ManyToManyField(Presenter)
     location = models.CharField(max_length=255)
 
