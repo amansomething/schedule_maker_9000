@@ -63,9 +63,10 @@ def download_schedule_data(links: list[str], output_dir: str = RESULTS_DIR) -> l
     :param output_dir: The directory to save the files to.
     """
     errors = []
-    for link in links:
+    total = len(links)
+    for i, link in enumerate(links):
         filename = link.split("/")[-2].strip() + ".html"
-        print(f"Downloading {filename}")
+        print(f"Downloading {filename} ({i}/{total})")
         response = httpx.get(link)
 
         if response.status_code != 200:
@@ -99,6 +100,25 @@ def get_data(request: WSGIRequest) -> render:
     return render(request, "index.html", context=context)
 
 
+def parse_time(time_str: str) -> datetime:
+    """
+    Helper function to parse the time string. Handles special values like "NOON".
+
+    :param time_str: The time string to parse. Expected format examples:
+        "2 PM", "2:30 PM", "NOON"
+    :return: A datetime object representing the time.
+    """
+    if time_str == "NOON":
+        time_str = "12 PM"
+
+    try:
+        result = datetime.strptime(time_str, "%I:%M %p")
+    except ValueError:
+        result = datetime.strptime(time_str, "%I %p")
+
+    return result
+
+
 def get_timestamps(day_str: str, time_str: str):
     """
     Parses the time string and returns the start and end times.
@@ -120,15 +140,9 @@ def get_timestamps(day_str: str, time_str: str):
     date_obj = datetime.strptime(date_str, "%Y-%m-%d")
 
     start_time_str, end_time_str = tuple(x.upper() for x in time_str.replace(".", "").split("-"))
-    try:
-        start_time = datetime.strptime(start_time_str, "%I:%M %p")
-    except ValueError:
-        start_time = datetime.strptime(start_time_str, "%I %p")
 
-    try:
-        end_time = datetime.strptime(end_time_str, "%I:%M %p")
-    except ValueError:
-        end_time = datetime.strptime(end_time_str, "%I %p")
+    start_time = parse_time(start_time_str)
+    end_time = parse_time(end_time_str)
 
     start_timestamp = date_obj.replace(hour=start_time.hour, minute=start_time.minute)
     end_timestamp = date_obj.replace(hour=end_time.hour, minute=end_time.minute)
@@ -136,8 +150,8 @@ def get_timestamps(day_str: str, time_str: str):
     start_time = start_timestamp.replace(tzinfo=ZoneInfo("America/New_York"))
     end_time = end_timestamp.replace(tzinfo=ZoneInfo("America/New_York"))
 
-    print("Start Timestamp:", start_time)
-    print("End Timestamp:", end_time)
+    # print("Start Timestamp:", start_time)
+    # print("End Timestamp:", end_time)
 
     return start_time, end_time
 
@@ -165,15 +179,6 @@ def parse_schedule_data(soup: BeautifulSoup, event_id: int):
     # print("Time:", event_time)
     # print("Location:", location)
 
-    dates = {
-        "Wednesday": "2024-05-15",
-        "Thursday": "2024-05-16",
-        "Friday": "2024-05-17",
-        "Saturday": "2024-05-18",
-        "Sunday": "2024-05-19"
-    }
-
-    date = dates[day]
     start_time, end_time = get_timestamps(day, event_times)
 
     panel_body = soup.find("div", class_="panel-body")
@@ -227,20 +232,21 @@ def parse_data(request: WSGIRequest) -> render:
     files = [f for f in os.listdir(RESULTS_DIR) if f.endswith(".html")]
     current_dir = os.path.abspath(RESULTS_DIR)
 
-    filename = "/code/site_data/20.html"
-    print(f"Parsing schedule data for: {filename}")
-    soup = read_html_file(filename)
-    event_id = 20
-    parse_schedule_data(soup, event_id)
-    # for file in files:
-    #     filename = os.path.join(current_dir, file)
-    #     try:
-    #         event_id = int(file.split(".html")[0])
-    #     except ValueError:
-    #         event_id = 0
-    #
-    #     soup = read_html_file(filename)
-    #     parse_schedule_data(soup, event_id)
+    # filename = "/code/site_data/20.html"
+    # print(f"Parsing schedule data for: {filename}")
+    # soup = read_html_file(filename)
+    # event_id = 20
+    # parse_schedule_data(soup, event_id)
+
+    for file in files:
+        filename = os.path.join(current_dir, file)
+        try:
+            event_id = int(file.split(".html")[0])
+        except ValueError:
+            event_id = 0
+
+        soup = read_html_file(filename)
+        parse_schedule_data(soup, event_id)
 
     context = {}
     return render(request, "index.html", context=context)
