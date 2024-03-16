@@ -20,7 +20,9 @@
 <nav>
     <a class="nav-button" href="{% url 'home' %}">Home</a>
     <a class="nav-button" href="{% url 'get_data' %}">Get Data</a>
-    <a class="nav-button" href="{% url 'parse_data' %}">Parse Data</a>
+    {% if events_exist %}
+        <a class="nav-button" href="{% url 'parse_data' %}">Parse Data</a>
+    {% endif %}
     <a class="nav-button" href="{% url 'admin:index' %}">Django Admin</a>
 </nav>
 <hr>

@@ -4,18 +4,32 @@ from typing import Optional
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from django.utils import dateparse
+from django.utils import timezone
 from django.shortcuts import render
 from django.core.handlers.wsgi import WSGIRequest
 
 import httpx
 from bs4 import BeautifulSoup
 
-from .models import Event, Presenter
+from .models import Event, Presenter, TableUpdate
 
 BASE_URL = "https://us.pycon.org"
 SCHEDULES_URL = f"{BASE_URL}/2024/schedule/"
 RESULTS_DIR = "site_data"
+
+
+def get_context():
+    """
+    Gets the context for the index page.
+    """
+    events_exist = TableUpdate.objects.filter(table_name="EventsExist").exists()
+
+    context = {
+        "events": Event.objects.all(),
+        "presenters": Presenter.objects.all(),
+        "events_exist": events_exist,
+    }
+    return context
 
 
 def read_html_file(file_path) -> Optional[BeautifulSoup]:
@@ -92,10 +106,10 @@ def get_data(request: WSGIRequest) -> render:
         print(errors)
     else:
         message = "Latest schedule data downloaded successfully! Ready to parse."
+        TableUpdate.objects.update_or_create(table_name="EventsExist")
 
-    context = {
-        "message": message,
-    }
+    context = get_context()
+    context["message"] = message
 
     return render(request, "index.html", context=context)
 
@@ -185,7 +199,7 @@ def parse_schedule_data(soup: BeautifulSoup, event_id: int):
     presenter_details = panel_body.find_all("a", href=re.compile(r"^/2024/speaker/profile"))
     presenters = []
     for detail in presenter_details:
-        print("Detail:", detail)
+        # print("Detail:", detail)
         presenter_name = detail.text
         try:
             presenter_link = detail["href"]
@@ -248,7 +262,11 @@ def parse_data(request: WSGIRequest) -> render:
         soup = read_html_file(filename)
         parse_schedule_data(soup, event_id)
 
-    context = {}
+    # Update TableUpdate values with both Event and Presenter tables
+    TableUpdate.objects.update_or_create(table_name="Event")
+    TableUpdate.objects.update_or_create(table_name="Presenter")
+
+    context = get_context()
     return render(request, "index.html", context=context)
 
 
@@ -256,4 +274,5 @@ def index(request):
     """
     Loads the home page.
     """
-    return render(request, "index.html")
+    context = get_context()
+    return render(request, "index.html", context=context)
