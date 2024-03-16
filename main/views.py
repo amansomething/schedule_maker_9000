@@ -120,9 +120,6 @@ def get_timestamps(day_str: str, time_str: str):
     date_obj = datetime.strptime(date_str, "%Y-%m-%d")
 
     start_time_str, end_time_str = tuple(x.upper() for x in time_str.replace(".", "").split("-"))
-    print("Start Time Str:", start_time_str)
-    print("End Time Str:", end_time_str)
-    print("---")
     try:
         start_time = datetime.strptime(start_time_str, "%I:%M %p")
     except ValueError:
@@ -133,16 +130,16 @@ def get_timestamps(day_str: str, time_str: str):
     except ValueError:
         end_time = datetime.strptime(end_time_str, "%I %p")
 
-    print("Start Time:", start_time)
-    print("End Time:", end_time)
-
     start_timestamp = date_obj.replace(hour=start_time.hour, minute=start_time.minute)
     end_timestamp = date_obj.replace(hour=end_time.hour, minute=end_time.minute)
 
-    print("Start Timestamp:", start_timestamp)
-    print("End Timestamp:", end_timestamp)
+    start_time = start_timestamp.replace(tzinfo=ZoneInfo("America/New_York"))
+    end_time = end_timestamp.replace(tzinfo=ZoneInfo("America/New_York"))
 
-    return start_timestamp, end_timestamp
+    print("Start Timestamp:", start_time)
+    print("End Timestamp:", end_time)
+
+    return start_time, end_time
 
 
 def parse_schedule_data(soup: BeautifulSoup, event_id: int):
@@ -202,18 +199,18 @@ def parse_schedule_data(soup: BeautifulSoup, event_id: int):
         presenters.append(presenter_id)
 
     description = soup.find("div", class_="description").text
-    timestamp = dateparse.parse_date(date)
 
     event, created = Event.objects.get_or_create(
         id=event_id,
         defaults={
             "title": heading,
             "description": description,
-            "timestamp": timestamp,
+            "start_time": start_time,
+            "end_time": end_time,
             "location": location
         }
     )
-    print(f"Timestamp: {event.timestamp}")
+
     # Add the presenters to the event.
     for presenter_id in presenters:
         event.presenters.add(presenter_id)
