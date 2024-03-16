@@ -4,7 +4,6 @@ from typing import Optional
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from django.utils import timezone
 from django.shortcuts import render
 from django.core.handlers.wsgi import WSGIRequest
 
@@ -23,10 +22,23 @@ def get_context():
     Gets the context for the index page.
     """
     events_exist = TableUpdate.objects.filter(table_name="EventsExist").exists()
+    events_data = Event.objects.all().order_by('start_time')
+    events = []
+    for event in events_data:
+        presenters = event.presenters.all()
+        presenters_str = ", ".join([p.name for p in presenters])
+        events.append({
+            "title": event.title,
+            "description": event.description,
+            "day": event.start_time.strftime("%A"),
+            "start_time": event.start_time.strftime("%I:%M %p"),
+            "end_time": event.end_time.strftime("%I:%M %p"),
+            "location": event.location,
+            "presenters": presenters_str
+        })
 
     context = {
-        "events": Event.objects.all(),
-        "presenters": Presenter.objects.all(),
+        "events": events,
         "events_exist": events_exist,
     }
     return context

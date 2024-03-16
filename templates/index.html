@@ -2,13 +2,34 @@
 
 {% block content %}
     <main>
-        {% if results %}
-            <h2>Results</h2>
-            <ul>
-                {% for result in results %}
-                    <li>{{ result }}</li>
+        {% if events %}
+            <table id="all-schedules">
+                <caption>All Events</caption>
+                <thead>
+                <tr>
+                    <th>Event</th>
+                    <th>Description</th>
+                    <th>Day</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Location</th>
+                    <th>Presenters</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for event in events %}
+                    <tr>
+                        <td>{{ event.title }}</td>
+                        <td>{{ event.description }}</td>
+                        <td>{{ event.day }}</td>
+                        <td>{{ event.start_time }}</td>
+                        <td>{{ event.end_time }}</td>
+                        <td>{{ event.location }}</td>
+                        <td>{{ event.presenters }}</td>
+                    </tr>
                 {% endfor %}
-            </ul>
+                </tbody>
+            </table>
         {% endif %}
     </main>
 {% endblock content %}
