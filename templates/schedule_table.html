@@ -1,0 +1,28 @@
+<table class="schedule-table">
+    <caption>{{ events.0.day }}</caption>
+    <thead>
+    <tr>
+        <th>Event</th>
+        <th>Description</th>
+        <th>Start</th>
+        <th>End</th>
+        <th>Location</th>
+        <th>Presenters</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for event in events %}
+        <tr>
+            <td>{{ event.title }}</td>
+            <td>{{ event.description }}</td>
+            <td>{{ event.start_time }}</td>
+            <td>{{ event.end_time }}</td>
+            <td>{{ event.location }}</td>
+            <td>{{ event.presenters }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<hr>
+
+<br><br>

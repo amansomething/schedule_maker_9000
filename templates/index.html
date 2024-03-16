@@ -2,34 +2,24 @@
 
 {% block content %}
     <main>
-        {% if events %}
-            <table id="all-schedules">
-                <caption>All Events</caption>
-                <thead>
-                <tr>
-                    <th>Event</th>
-                    <th>Description</th>
-                    <th>Day</th>
-                    <th>Start</th>
-                    <th>End</th>
-                    <th>Location</th>
-                    <th>Presenters</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for event in events %}
-                    <tr>
-                        <td>{{ event.title }}</td>
-                        <td>{{ event.description }}</td>
-                        <td>{{ event.day }}</td>
-                        <td>{{ event.start_time }}</td>
-                        <td>{{ event.end_time }}</td>
-                        <td>{{ event.location }}</td>
-                        <td>{{ event.presenters }}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        {% endif %}
+        {% with events=events_wednesday %}
+            {% include 'schedule_table.html' %}
+        {% endwith %}
+
+        {% with events=events_thursday %}
+            {% include 'schedule_table.html' %}
+        {% endwith %}
+
+        {% with events=events_friday %}
+            {% include 'schedule_table.html' %}
+        {% endwith %}
+
+        {% with events=events_saturday %}
+            {% include 'schedule_table.html' %}
+        {% endwith %}
+
+        {% with events=events_sunday %}
+            {% include 'schedule_table.html' %}
+        {% endwith %}
     </main>
 {% endblock content %}

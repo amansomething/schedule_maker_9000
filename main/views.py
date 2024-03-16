@@ -34,24 +34,25 @@ def get_context():
         presenters = event.presenters.all()
         presenters_str = ", ".join([p.name for p in presenters])
 
+        day = event.start_time.strftime("%A")
         event_info = {
             "title": event.title,
             "description": event.description,
-            "day": event.start_time.strftime("%A"),
+            "day": day,
             "start_time": event.start_time.strftime("%I:%M %p"),
             "end_time": event.end_time.strftime("%I:%M %p"),
             "location": event.location,
             "presenters": presenters_str
         }
-        if event_info["day"] == "Wednesday":
+        if day == "Wednesday":
             events_wednesday.append(event_info)
-        elif event_info["day"] == "Thursday":
+        elif day == "Thursday":
             events_thursday.append(event_info)
-        elif event_info["day"] == "Friday":
+        elif day == "Friday":
             events_friday.append(event_info)
-        elif event_info["day"] == "Saturday":
+        elif day == "Saturday":
             events_saturday.append(event_info)
-        elif event_info["day"] == "Sunday":
+        elif day == "Sunday":
             events_sunday.append(event_info)
         else:
             print("Error: Day not found.")

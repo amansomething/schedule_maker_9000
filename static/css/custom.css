@@ -21,23 +21,21 @@ nav {
     padding: 5px 10px;
 }
 
-#all-schedules {
-    border: 1px solid #000;
+.schedule-table {
     caption-side: top;
 }
 
-#all-schedules caption {
-    font-size: 1.5em;
-    font-weight: bold;
+.schedule-table caption{
+    font-size: 2em;
 }
 
-#all-schedules th {
+.schedule-table th{
     background: #369;
     color: #fff;
     padding: 5px 10px;
 }
 
-#all-schedules tbody tr:nth-child(odd) {
+.schedule-table tbody tr:nth-child(odd) {
     background: #ddd;
     border-bottom: 1px solid #000;
 }
