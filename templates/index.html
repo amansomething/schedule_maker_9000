@@ -1,13 +1,6 @@
 {% extends '_base.html' %}
 
 {% block content %}
-    <nav>
-        <a class="nav-button" href="{% url 'home' %}">Home</a>
-        <a class="nav-button" href="{% url 'get_data' %}">Get Data</a>
-        <a class="nav-button" href="{% url 'parse_data' %}">Parse Data</a>
-    </nav>
-    <hr>
-
     <main>
         {% if results %}
             <h2>Results</h2>
