@@ -9,7 +9,6 @@
     <link rel="icon" href="{% static 'img/favicon.svg' %}">
 
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/bootstrap-utilities.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/custom.css' %}">
 </head>
 <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
@@ -19,15 +18,7 @@
     </p>
 {% endif %}
 
-<nav>
-    <a class="nav-button" href="{% url 'home' %}">Home</a>
-    <a class="nav-button" href="{% url 'get_data' %}">Get Data</a>
-    {% if events_exist %}
-        <a class="nav-button" href="{% url 'parse_data' %}">Parse Data</a>
-    {% endif %}
-    <a class="nav-button" href="{% url 'admin:index' %}">Django Admin</a>
-</nav>
-<hr>
+{% include '_nav.html' %}
 
 {% block content %}
 {% endblock content %}

@@ -9,12 +9,6 @@ nav {
     gap: 10px;
 }
 
-.nav-button {
-    text-align: center;
-    border: 1px solid #000;
-    padding: 5px 10px;
-}
-
 .alert {
     background: #369;
     color: #fff;
@@ -22,21 +16,10 @@ nav {
 }
 
 .schedule-table {
-    caption-side: top;
     margin-bottom: 50px;
 }
 
 .schedule-table caption{
-    font-size: 2em;
-}
-
-.schedule-table th{
-    background: #369;
-    color: #fff;
-    padding: 5px 10px;
-}
-
-.schedule-table tbody tr:nth-child(odd) {
-    background: #ddd;
-    border-bottom: 1px solid #000;
+    font-size: 1.5em;
+    text-align: center;
 }
