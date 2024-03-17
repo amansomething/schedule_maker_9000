@@ -3,10 +3,12 @@ main {
     padding: 20px;
 }
 
-nav {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, 150px);
-    gap: 10px;
+.nav-link {
+    color: #fff;
+}
+
+nav a.active{
+    background: #fff;
 }
 
 .alert {
