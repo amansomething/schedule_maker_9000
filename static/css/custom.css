@@ -23,6 +23,7 @@ nav {
 
 .schedule-table {
     caption-side: top;
+    margin-bottom: 50px;
 }
 
 .schedule-table caption{

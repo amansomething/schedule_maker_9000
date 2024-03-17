@@ -2,23 +2,23 @@
 
 {% block content %}
     <main>
-        {% with events=events_wednesday %}
+        {% with events=all_events.Wednesday day="Wednesday" %}
             {% include 'schedule_table.html' %}
         {% endwith %}
 
-        {% with events=events_thursday %}
+        {% with events=all_events.Thursday day="Thursday" %}
             {% include 'schedule_table.html' %}
         {% endwith %}
 
-        {% with events=events_friday %}
+        {% with events=all_events.Friday day="Friday" %}
             {% include 'schedule_table.html' %}
         {% endwith %}
 
-        {% with events=events_saturday %}
+        {% with events=all_events.Saturday day="Saturday" %}
             {% include 'schedule_table.html' %}
         {% endwith %}
 
-        {% with events=events_sunday %}
+        {% with events=all_events.Sunday day="Sunday" %}
             {% include 'schedule_table.html' %}
         {% endwith %}
     </main>

@@ -24,11 +24,13 @@ def get_context():
     events_exist = TableUpdate.objects.filter(table_name="EventsExist").exists()
     events_data = Event.objects.all().order_by('start_time')
 
-    events_wednesday = []
-    events_thursday = []
-    events_friday = []
-    events_saturday = []
-    events_sunday = []
+    all_events = {
+        "Wednesday": [],
+        "Thursday": [],
+        "Friday": [],
+        "Saturday": [],
+        "Sunday": [],
+    }
 
     for event in events_data:
         presenters = event.presenters.all()
@@ -44,25 +46,13 @@ def get_context():
             "location": event.location,
             "presenters": presenters_str
         }
-        if day == "Wednesday":
-            events_wednesday.append(event_info)
-        elif day == "Thursday":
-            events_thursday.append(event_info)
-        elif day == "Friday":
-            events_friday.append(event_info)
-        elif day == "Saturday":
-            events_saturday.append(event_info)
-        elif day == "Sunday":
-            events_sunday.append(event_info)
-        else:
+        try:
+            all_events[day].append(event_info)
+        except IndexError:
             print("Error: Day not found.")
 
     context = {
-        "events_wednesday": events_wednesday,
-        "events_thursday": events_thursday,
-        "events_friday": events_friday,
-        "events_saturday": events_saturday,
-        "events_sunday": events_sunday,
+        "all_events": all_events,
         "events_exist": events_exist,
     }
     return context
