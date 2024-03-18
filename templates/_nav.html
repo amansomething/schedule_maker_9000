@@ -1,11 +1,14 @@
 <nav class="navbar bg-primary navbar-expand-lg text-primary">
     <div class="container-fluid">
+        <!-- Toggler -->
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
                 aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
+
+        <!-- Navbar content -->
         <div class="collapse navbar-collapse" id="navbarNavDropdown">
-            <ul class="navbar-nav">
+            <ul class="navbar-nav me-auto">
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'home' %}">Home</a>
                 </li>
@@ -18,18 +21,21 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'admin:index' %}">Django Admin</a>
                 </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                       aria-expanded="false">
-                        Change Timezone
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">Pacific</a></li>
-                        <li><a class="dropdown-item" href="#">Central</a></li>
-                        <li><a class="dropdown-item" href="#">Eastern</a></li>
-                    </ul>
-                </li>
             </ul>
+
+            <!-- Timezone Changer 9000 -->
+            <form class="d-flex" method="post" action="{% url 'change_tz' %}">{% csrf_token %}
+                <label for="select-tz" class="form-label">Change Timezone</label>
+                <select id="select-tz" name="select-tz" class="form-select" onchange="this.form.submit()">
+                    <option value="America/Los_Angeles">US/Pacific</option>
+                    <option value="America/Boise">US/Mountain</option>
+                    <option value="America/Chicago">US/Central</option>
+                    <option value="America/Los_Angeles">US/Eastern</option>
+                    {% for tz in tzs %}
+                        <option value="{{ tz }}">{{ tz }}</option>
+                    {% endfor %}
+                </select>
+            </form>
         </div>
     </div>
 </nav>

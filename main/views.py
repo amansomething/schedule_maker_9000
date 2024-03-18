@@ -1,10 +1,12 @@
 import os
 import re
+import zoneinfo
 from typing import Optional
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from django.shortcuts import render
+from django.utils.timezone import activate, localtime
+from django.shortcuts import render, redirect
 from django.core.handlers.wsgi import WSGIRequest
 
 import httpx
@@ -23,6 +25,7 @@ def get_context():
     """
     events_exist = TableUpdate.objects.filter(table_name="EventsExist").exists()
     events_data = Event.objects.all().order_by('start_time')
+    tzs = sorted(zoneinfo.available_timezones())
 
     all_events = {
         "Wednesday": [],
@@ -37,12 +40,14 @@ def get_context():
         presenters_str = ", ".join([p.name for p in presenters])
 
         day = event.start_time.strftime("%A")
+        start_time = localtime(event.start_time)
+        end_time = localtime(event.end_time)
         event_info = {
             "title": event.title,
             "description": event.description,
             "day": day,
-            "start_time": event.start_time.strftime("%I:%M %p"),
-            "end_time": event.end_time.strftime("%I:%M %p"),
+            "start_time": start_time.strftime("%I:%M %p"),
+            "end_time": end_time.strftime("%I:%M %p"),
             "location": event.location,
             "presenters": presenters_str
         }
@@ -54,6 +59,7 @@ def get_context():
     context = {
         "all_events": all_events,
         "events_exist": events_exist,
+        "tzs": tzs,
     }
     return context
 
@@ -296,9 +302,25 @@ def parse_data(request: WSGIRequest) -> render:
     return render(request, "index.html", context=context)
 
 
+def change_tz(request):
+    valid_tzs = zoneinfo.available_timezones()
+    tz = request.POST.get('select-tz')
+
+    if tz and tz not in valid_tzs:
+        tz = 'UTC'  # Default to UTC if an unsupported timezone is passed
+    request.session['django_timezone'] = tz
+    activate(tz)
+
+    return redirect('home')
+
+
 def index(request):
     """
     Loads the home page.
     """
     context = get_context()
+    all_timezones = sorted(zoneinfo.available_timezones())
+    for item in all_timezones:
+        print(item, type(item))
+
     return render(request, "index.html", context=context)

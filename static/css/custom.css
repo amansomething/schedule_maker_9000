@@ -3,7 +3,7 @@ main {
     padding: 20px;
 }
 
-.nav-link {
+.nav-link, nav label {
     color: #fff;
 }
 
