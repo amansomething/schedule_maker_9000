@@ -19,7 +19,13 @@ SCHEDULES_URL = f"{BASE_URL}/2024/schedule/"
 RESULTS_DIR = "site_data"
 
 
-def get_valid_tzs(request: WSGIRequest):
+def get_valid_tzs(request: WSGIRequest) -> tuple[list[str], list[str]]:
+    """
+    Gets the valid timezones for the user to select from.
+    Puts common US timezones at the top of the list.
+
+    :return: A tuple of valid timezones and common timezones.
+    """
     common_tzs = [
         "America/Los_Angeles",  # Pacific
         "America/Denver",  # Mountain
@@ -320,12 +326,16 @@ def parse_data(request: WSGIRequest) -> render:
 
 
 def change_tz(request: WSGIRequest) -> redirect:
+    """
+    Changes the timezone for the user. Sets UTC as the default if an unsupported timezone is passed.
+    Redirects to the homepage.
+    """
     valid_tzs, _ = get_valid_tzs(request)
 
     tz = request.POST.get('select-tz')
 
     if tz and tz not in valid_tzs:
-        tz = 'UTC'  # Default to UTC if an unsupported timezone is passed
+        tz = 'UTC'
     request.session['django_timezone'] = tz
 
     print(f"Timezone set to: {tz}")
