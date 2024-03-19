@@ -3,9 +3,10 @@
 {% block content %}
     <main>
         <p>
-            If you don't see any data, click "Get Data" to get started. That will download the latest schedule from
-            https://us.pycon.org/2024/schedule/.
+            If you don't see any data, click "Get Data" to get started. That will download the latest <a
+                href="https://us.pycon.org/2024/schedule/">PyCon schedule data</a>.
         </p>
+        <p>DO NOT run "Get Data" too frequently. Maybe twice a day at most.</p>
         <p>Then, click "Parse Data" to load the local database and display the results.</p>
 
         {% with events=all_events.Wednesday day="Wednesday" %}

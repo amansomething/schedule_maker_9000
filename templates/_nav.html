@@ -27,12 +27,23 @@
             <form class="d-flex" method="post" action="{% url 'change_tz' %}">{% csrf_token %}
                 <label for="select-tz" class="form-label">Change Timezone</label>
                 <select id="select-tz" name="select-tz" class="form-select" onchange="this.form.submit()">
-                    <option value="America/Los_Angeles">US/Pacific</option>
-                    <option value="America/Boise">US/Mountain</option>
-                    <option value="America/Chicago">US/Central</option>
-                    <option value="America/Los_Angeles">US/Eastern</option>
                     {% for tz in tzs %}
-                        <option value="{{ tz }}">{{ tz }}</option>
+                        {% if tz in common_tzs %}
+                            {% if tz == "America/Los_Angeles" %}
+                                <option value="{{ tz }}">US/Pacific</option>
+                            {% endif %}
+                            {% if tz == "America/Denver" %}
+                                <option value="{{ tz }}">US/Mountain</option>
+                            {% endif %}
+                            {% if tz == "America/Chicago" %}
+                                <option value="{{ tz }}">US/Central</option>
+                            {% endif %}
+                            {% if tz == "America/New_York" %}
+                                <option value="{{ tz }}">US/Eastern</option>
+                            {% endif %}
+                        {% else %}
+                            <option value="{{ tz }}">{{ tz }}</option>
+                        {% endif %}
                     {% endfor %}
                 </select>
             </form>

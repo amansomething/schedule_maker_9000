@@ -19,13 +19,26 @@ SCHEDULES_URL = f"{BASE_URL}/2024/schedule/"
 RESULTS_DIR = "site_data"
 
 
+def get_valid_tzs():
+    common_tzs = [
+        "America/Los_Angeles",  # Pacific
+        "America/Denver",  # Mountain
+        "America/Chicago",  # Central
+        "America/New_York",  # Eastern
+    ]
+    other_valid_tzs = sorted([x for x in zoneinfo.available_timezones() if x not in common_tzs])
+    valid_tzs = common_tzs + other_valid_tzs
+
+    return valid_tzs, common_tzs
+
+
 def get_context():
     """
     Gets the context for the index page.
     """
     events_exist = TableUpdate.objects.filter(table_name="EventsExist").exists()
     events_data = Event.objects.all().order_by('start_time')
-    tzs = sorted(zoneinfo.available_timezones())
+    tzs, common_tzs = get_valid_tzs()
 
     all_events = {
         "Wednesday": [],
@@ -60,6 +73,7 @@ def get_context():
         "all_events": all_events,
         "events_exist": events_exist,
         "tzs": tzs,
+        "common_tzs": common_tzs,
     }
     return context
 
@@ -303,12 +317,15 @@ def parse_data(request: WSGIRequest) -> render:
 
 
 def change_tz(request):
-    valid_tzs = zoneinfo.available_timezones()
+    valid_tzs, _ = get_valid_tzs()
+
     tz = request.POST.get('select-tz')
 
     if tz and tz not in valid_tzs:
         tz = 'UTC'  # Default to UTC if an unsupported timezone is passed
     request.session['django_timezone'] = tz
+
+    print(f"Timezone set to: {tz}")
     activate(tz)
 
     return redirect('home')
@@ -319,8 +336,5 @@ def index(request):
     Loads the home page.
     """
     context = get_context()
-    all_timezones = sorted(zoneinfo.available_timezones())
-    for item in all_timezones:
-        print(item, type(item))
 
     return render(request, "index.html", context=context)
