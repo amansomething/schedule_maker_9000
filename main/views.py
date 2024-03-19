@@ -19,7 +19,7 @@ SCHEDULES_URL = f"{BASE_URL}/2024/schedule/"
 RESULTS_DIR = "site_data"
 
 
-def get_valid_tzs():
+def get_valid_tzs(request: WSGIRequest):
     common_tzs = [
         "America/Los_Angeles",  # Pacific
         "America/Denver",  # Mountain
@@ -32,13 +32,15 @@ def get_valid_tzs():
     return valid_tzs, common_tzs
 
 
-def get_context():
+def get_context(request: WSGIRequest):
     """
     Gets the context for the index page.
     """
     events_exist = TableUpdate.objects.filter(table_name="EventsExist").exists()
     events_data = Event.objects.all().order_by('start_time')
-    tzs, common_tzs = get_valid_tzs()
+    tzs, common_tzs = get_valid_tzs(request)
+
+    current_tz = request.session.get("django_timezone", "UTC")
 
     all_events = {
         "Wednesday": [],
@@ -74,6 +76,7 @@ def get_context():
         "events_exist": events_exist,
         "tzs": tzs,
         "common_tzs": common_tzs,
+        "current_tz": current_tz,
     }
     return context
 
@@ -154,7 +157,7 @@ def get_data(request: WSGIRequest) -> render:
         message = "Latest schedule data downloaded successfully! Ready to parse."
         TableUpdate.objects.update_or_create(table_name="EventsExist")
 
-    context = get_context()
+    context = get_context(request)
     context["message"] = message
 
     return render(request, "index.html", context=context)
@@ -312,12 +315,12 @@ def parse_data(request: WSGIRequest) -> render:
     TableUpdate.objects.update_or_create(table_name="Event")
     TableUpdate.objects.update_or_create(table_name="Presenter")
 
-    context = get_context()
+    context = get_context(request)
     return render(request, "index.html", context=context)
 
 
-def change_tz(request):
-    valid_tzs, _ = get_valid_tzs()
+def change_tz(request: WSGIRequest) -> redirect:
+    valid_tzs, _ = get_valid_tzs(request)
 
     tz = request.POST.get('select-tz')
 
@@ -331,10 +334,10 @@ def change_tz(request):
     return redirect('home')
 
 
-def index(request):
+def index(request: WSGIRequest):
     """
     Loads the home page.
     """
-    context = get_context()
+    context = get_context(request)
 
     return render(request, "index.html", context=context)

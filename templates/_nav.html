@@ -27,6 +27,7 @@
             <form class="d-flex" method="post" action="{% url 'change_tz' %}">{% csrf_token %}
                 <label for="select-tz" class="form-label">Change Timezone</label>
                 <select id="select-tz" name="select-tz" class="form-select" onchange="this.form.submit()">
+                    <option value="{{ current_tz }}" selected>{{ current_tz }}</option>
                     {% for tz in tzs %}
                         {% if tz in common_tzs %}
                             {% if tz == "America/Los_Angeles" %}
