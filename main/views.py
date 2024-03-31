@@ -152,6 +152,7 @@ def download_schedule_data(links: list[str], output_dir: str = RESULTS_DIR) -> l
 def get_data(request: WSGIRequest) -> render:
     """
     Gets the latest data from the website and saves the results.
+    If successful, also parses the data and fills the database.
     """
     links = get_all_schedule_links()
     errors = download_schedule_data(links)
@@ -160,7 +161,11 @@ def get_data(request: WSGIRequest) -> render:
         message = errors
         print(errors)
     else:
-        message = "Latest schedule data downloaded successfully! Ready to parse."
+        errors = parse_data(request)
+        if errors:
+            message = errors
+        else:
+            message = "Latest schedule data downloaded and parse successfully!"
         TableUpdate.objects.update_or_create(table_name="EventsExist")
 
     context = get_context(request)
@@ -225,7 +230,7 @@ def get_timestamps(day_str: str, time_str: str):
     return start_time, end_time
 
 
-def parse_schedule_data(soup: BeautifulSoup, event_id: int):
+def parse_schedule_data(soup: BeautifulSoup, event_id: int) -> Optional[list[str]]:
     """
     Parses the schedule data from the given soup object.
     Adds the data to the database.
@@ -285,12 +290,19 @@ def parse_schedule_data(soup: BeautifulSoup, event_id: int):
         }
     )
 
+    errors = []
+
     # Add the presenters to the event.
     for presenter_id in presenters:
-        event.presenters.add(presenter_id)
+        try:
+            event.presenters.add(presenter_id)
+        except ValueError:
+            errors.append(f"Error adding presenter {presenter_id} to event {event_id}")
+
+    return errors
 
 
-def parse_data(request: WSGIRequest) -> render:
+def parse_data(request: WSGIRequest) -> bool:
     """
     Parses the latest schedule data for all files in the results directory.
     """
@@ -299,6 +311,10 @@ def parse_data(request: WSGIRequest) -> render:
     Presenter.objects.all().delete()
 
     files = [f for f in os.listdir(RESULTS_DIR) if f.endswith(".html")]
+    if not files:
+        print("Error: No files found in the results directory.")
+        return False
+
     current_dir = os.path.abspath(RESULTS_DIR)
 
     # filename = "/code/site_data/20.html"
@@ -306,6 +322,8 @@ def parse_data(request: WSGIRequest) -> render:
     # soup = read_html_file(filename)
     # event_id = 20
     # parse_schedule_data(soup, event_id)
+
+    errors = []
 
     for file in files:
         filename = os.path.join(current_dir, file)
@@ -315,14 +333,21 @@ def parse_data(request: WSGIRequest) -> render:
             event_id = 0
 
         soup = read_html_file(filename)
-        parse_schedule_data(soup, event_id)
+        error = parse_schedule_data(soup, event_id)
+        if error:
+            errors.extend(error)
 
     # Update TableUpdate values with both Event and Presenter tables
     TableUpdate.objects.update_or_create(table_name="Event")
     TableUpdate.objects.update_or_create(table_name="Presenter")
 
-    context = get_context(request)
-    return render(request, "index.html", context=context)
+    if errors:
+        print("Errors parsing schedule data:")
+        for error in errors:
+            print(f"\t{error}")
+        return False
+
+    return True
 
 
 def change_tz(request: WSGIRequest) -> redirect:
