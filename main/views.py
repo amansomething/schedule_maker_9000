@@ -165,7 +165,7 @@ def get_data(request: WSGIRequest) -> render:
         if errors:
             message = errors
         else:
-            message = "Latest schedule data downloaded and parse successfully!"
+            message = "Latest schedule data downloaded and parsed successfully!"
         TableUpdate.objects.update_or_create(table_name="EventsExist")
 
     context = get_context(request)
@@ -302,10 +302,12 @@ def parse_schedule_data(soup: BeautifulSoup, event_id: int) -> Optional[list[str
     return errors
 
 
-def parse_data(request: WSGIRequest) -> bool:
+def parse_data(request: WSGIRequest) -> Optional[list[str]]:
     """
     Parses the latest schedule data for all files in the results directory.
     """
+    errors = []
+
     # Clear out the existing tables
     Event.objects.all().delete()
     Presenter.objects.all().delete()
@@ -313,7 +315,7 @@ def parse_data(request: WSGIRequest) -> bool:
     files = [f for f in os.listdir(RESULTS_DIR) if f.endswith(".html")]
     if not files:
         print("Error: No files found in the results directory.")
-        return False
+        return errors
 
     current_dir = os.path.abspath(RESULTS_DIR)
 
@@ -322,8 +324,6 @@ def parse_data(request: WSGIRequest) -> bool:
     # soup = read_html_file(filename)
     # event_id = 20
     # parse_schedule_data(soup, event_id)
-
-    errors = []
 
     for file in files:
         filename = os.path.join(current_dir, file)
@@ -345,9 +345,8 @@ def parse_data(request: WSGIRequest) -> bool:
         print("Errors parsing schedule data:")
         for error in errors:
             print(f"\t{error}")
-        return False
 
-    return True
+    return errors
 
 
 def change_tz(request: WSGIRequest) -> redirect:

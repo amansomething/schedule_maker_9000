@@ -2,31 +2,15 @@
 
 {% block content %}
     <main>
-        <p>
-            If you don't see any data, click "Get Data" to get started. That will download the latest <a
-                href="https://us.pycon.org/2024/schedule/">PyCon schedule data</a>.
-        </p>
-        <p>DO NOT run "Get Data" too frequently. Maybe twice a day at most.</p>
-        <p>Then, click "Parse Data" to load the local database and display the results.</p>
-
-        {% with events=all_events.Wednesday day="Wednesday" %}
-            {% include 'schedule_table.html' %}
-        {% endwith %}
-
-        {% with events=all_events.Thursday day="Thursday" %}
-            {% include 'schedule_table.html' %}
-        {% endwith %}
-
-        {% with events=all_events.Friday day="Friday" %}
-            {% include 'schedule_table.html' %}
-        {% endwith %}
-
-        {% with events=all_events.Saturday day="Saturday" %}
-            {% include 'schedule_table.html' %}
-        {% endwith %}
-
-        {% with events=all_events.Sunday day="Sunday" %}
-            {% include 'schedule_table.html' %}
-        {% endwith %}
+        {% if not events_exist %}
+            <p>
+                No events found. Click "Get Data" in the navbar to get started.
+            </p>
+            <p class="alert alert-warning">
+                Please be patient as the data is being fetched. It may take a few minutes.
+            </p>
+        {% else %}
+            {% include 'all_tables.html' %}
+        {% endif %}
     </main>
 {% endblock content %}

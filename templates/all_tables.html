@@ -1,0 +1,24 @@
+<p>
+    Data from <a href="https://us.pycon.org/2024/schedule/">PyCon schedule</a> is ready.
+</p>
+<p>DO NOT run "Get Data" too frequently. Maybe twice a day at most.</p>
+<p>It downloads each presentation page locally for parsing.</p>
+{% with events=all_events.Wednesday day="Wednesday (03/15)" %}
+    {% include 'schedule_table.html' %}
+{% endwith %}
+
+{% with events=all_events.Thursday day="Thursday (03/16)" %}
+    {% include 'schedule_table.html' %}
+{% endwith %}
+
+{% with events=all_events.Friday day="Friday (03/17)" %}
+    {% include 'schedule_table.html' %}
+{% endwith %}
+
+{% with events=all_events.Saturday day="Saturday (03/18)" %}
+    {% include 'schedule_table.html' %}
+{% endwith %}
+
+{% with events=all_events.Sunday day="Sunday (03/19)" %}
+    {% include 'schedule_table.html' %}
+{% endwith %}
