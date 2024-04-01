@@ -368,6 +368,15 @@ def change_tz(request: WSGIRequest) -> redirect:
     return redirect('home')
 
 
+def select_events(request: WSGIRequest):
+    """
+    Loads the home page.
+    """
+    context = get_context(request)
+
+    return render(request, "select_events.html", context=context)
+
+
 def index(request: WSGIRequest):
     """
     Loads the home page.
