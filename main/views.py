@@ -64,6 +64,7 @@ def get_context(request: WSGIRequest):
         start_time = localtime(event.start_time)
         end_time = localtime(event.end_time)
         event_info = {
+            "id": event.id,
             "title": event.title,
             "description": event.description,
             "day": day,

@@ -3,22 +3,22 @@
 </p>
 <p>DO NOT run "Get Data" too frequently. Maybe twice a day at most.</p>
 <p>It downloads each presentation page locally for parsing.</p>
-{% with events=all_events.Wednesday day="Wednesday (03/15)" %}
+{% with events=all_events.Wednesday day="Wednesday (03/15)" eid="events-wed" %}
     {% include 'schedule_table.html' %}
 {% endwith %}
 
-{% with events=all_events.Thursday day="Thursday (03/16)" %}
+{% with events=all_events.Thursday day="Thursday (03/16)" eid="events-thu" %}
     {% include 'schedule_table.html' %}
 {% endwith %}
 
-{% with events=all_events.Friday day="Friday (03/17)" %}
+{% with events=all_events.Friday day="Friday (03/17)" eid="events-fri" %}
     {% include 'schedule_table.html' %}
 {% endwith %}
 
-{% with events=all_events.Saturday day="Saturday (03/18)" %}
+{% with events=all_events.Saturday day="Saturday (03/18)" eid="events-sat" %}
     {% include 'schedule_table.html' %}
 {% endwith %}
 
-{% with events=all_events.Sunday day="Sunday (03/19)" %}
+{% with events=all_events.Sunday day="Sunday (03/19)" eid="events-sun" %}
     {% include 'schedule_table.html' %}
 {% endwith %}

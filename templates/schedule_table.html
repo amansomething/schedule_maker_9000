@@ -1,25 +1,39 @@
-<table class="table table-striped schedule-table caption-top">
-    <caption>{{ day }}</caption>
-    <thead>
-    <tr>
-        <th>Event</th>
-        <th>Description</th>
-        <th>Start</th>
-        <th>End</th>
-        <th>Location</th>
-        <th>Presenters</th>
-    </tr>
-    </thead>
-    <tbody>
-    {% for event in events %}
+<div class="accordion" id="{{ eid }}">
+    <table class="table table-striped schedule-table caption-top">
+        <caption>{{ day }}</caption>
+        <thead>
         <tr>
-            <td>{{ event.title }}</td>
-            <td>{{ event.description }}</td>
-            <td>{{ event.start_time }}</td>
-            <td>{{ event.end_time }}</td>
-            <td>{{ event.location }}</td>
-            <td>{{ event.presenters }}</td>
+            <th>Time</th>
+            <th>Event</th>
+            <th>Location</th>
+            <th>Presenters</th>
         </tr>
-    {% endfor %}
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+        {% for event in events %}
+            <tr>
+            <td>{{ event.start_time }} - {{ event.end_time }}</td>
+                <td>
+                    <div class="accordion-item">
+                        <h4 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    aria-expanded="false"
+                                    data-bs-target="#e{{ event.id }}" aria-controls="e{{ event.id }}">
+                                {{ event.title }}
+                            </button>
+                        </h4>
+                        <div id="e{{ event.id }}" class="accordion-collapse collapse"
+                             data-bs-parent="#{{ eid }}">
+                            <div class="accordion-body">
+                                {{ event.description }}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                <td>{{ event.location }}</td>
+                <td>{{ event.presenters }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
