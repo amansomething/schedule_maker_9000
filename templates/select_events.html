@@ -3,14 +3,23 @@
 {% block content %}
     <main>
         <h2>Events Added 9000</h2>
-        <ul>
+        <div class="accordion" id="accordionWed">
             {% for event in wed_events %}
-                <li data-bs-toggle="tooltip" data-bs-placement="top"
-                    data-bs-custom-class="custom-tooltip"
-                    data-bs-title="This is a test.">
-                    {{ event.title }}
-                </li>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" aria-expanded="false"
+                                data-bs-target="#e{{ event.id }}" aria-controls="e{{ event.id }}">
+                            {{ event.title }}
+                        </button>
+                    </h2>
+                    <div id="e{{ event.id }}" class="accordion-collapse collapse"
+                         data-bs-parent="#accordionWed">
+                        <div class="accordion-body">
+                            {{ event.description }}
+                        </div>
+                    </div>
+                </div>
             {% endfor %}
-        </ul>
+        </div>
     </main>
 {% endblock content %}

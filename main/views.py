@@ -370,13 +370,11 @@ def change_tz(request: WSGIRequest) -> redirect:
 
 def select_events(request: WSGIRequest):
     """
-    Loads the home page.
+    Loads the page where all events are shown that can then be added to favorites.
     """
     context = get_context(request)
 
     wed_events = Event.objects.filter(start_time__day=15).order_by('start_time')
-    for event in wed_events:
-        print(event.title, event.start_time)
     context["wed_events"] = wed_events
 
     return render(request, "select_events.html", context=context)
