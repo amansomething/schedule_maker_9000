@@ -23,6 +23,14 @@ class Event(models.Model):
         return self.title
 
 
+class SelectEvent(models.Model):
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    selected = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.event.title} - Selected: {self.selected}"
+
+
 class TableUpdate(models.Model):
     table_name = models.CharField(max_length=255)
     last_updated = models.DateTimeField(auto_now=True)
