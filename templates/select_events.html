@@ -3,6 +3,14 @@
 {% block content %}
     <main>
         <h2>Events Added 9000</h2>
-    <p>This page is used to pick the events you actually want to attend.</p>
+        <ul>
+            {% for event in wed_events %}
+                <li data-bs-toggle="tooltip" data-bs-placement="top"
+                    data-bs-custom-class="custom-tooltip"
+                    data-bs-title="This is a test.">
+                    {{ event.title }}
+                </li>
+            {% endfor %}
+        </ul>
     </main>
 {% endblock content %}
