@@ -8,6 +8,7 @@ from zoneinfo import ZoneInfo
 from django.utils.timezone import activate, localtime
 from django.shortcuts import render, redirect
 from django.core.handlers.wsgi import WSGIRequest
+from django.contrib.auth.decorators import login_required
 
 import httpx
 from bs4 import BeautifulSoup
@@ -150,6 +151,7 @@ def download_schedule_data(links: list[str], output_dir: str = RESULTS_DIR) -> l
     return errors
 
 
+@login_required(login_url='/admin/login/?next=/get_data')
 def get_data(request: WSGIRequest) -> render:
     """
     Gets the latest data from the website and saves the results.
@@ -369,18 +371,19 @@ def change_tz(request: WSGIRequest) -> redirect:
     return redirect('home')
 
 
+@login_required(login_url='/admin/login/?next=/select_events')
 def select_events(request: WSGIRequest):
     """
     Loads the page where all events are shown that can then be added to favorites.
     """
     context = get_context(request)
 
-    wed_events = Event.objects.filter(start_time__day=15).order_by('start_time')
-    context["wed_events"] = wed_events
+    # wed_events = Event.objects.filter(start_time__day=15).order_by('start_time')
 
     return render(request, "select_events.html", context=context)
 
 
+@login_required(login_url='/admin/login/?next=/home')
 def index(request: WSGIRequest):
     """
     Loads the home page.
