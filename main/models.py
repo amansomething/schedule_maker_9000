@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 
@@ -24,11 +25,16 @@ class Event(models.Model):
 
 
 class SelectEvent(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
-    selected = models.BooleanField(default=False)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'event'], name='unique_user_event')
+        ]
 
     def __str__(self):
-        return f"{self.event.title} - Selected: {self.selected}"
+        return f"{self.user.name} - {self.event.title}"
 
 
 class TableUpdate(models.Model):
