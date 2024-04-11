@@ -7,12 +7,13 @@
             <th>Event</th>
             <th>Location</th>
             <th>Presenters</th>
+            <th>Going?</th>
         </tr>
         </thead>
         <tbody>
         {% for event in events %}
             <tr>
-            <td>{{ event.start_time }} - {{ event.end_time }}</td>
+                <td>{{ event.start_time }} - {{ event.end_time }}</td>
                 <td>
                     <div class="accordion-item">
                         <h4 class="accordion-header">
@@ -32,6 +33,13 @@
                 </td>
                 <td>{{ event.location }}</td>
                 <td>{{ event.presenters }}</td>
+                <td>
+                    <!-- Checkbox for selecting an event -->
+                    <label for="checkbox{{ event.id }}"></label>
+                    <input type="checkbox" hx-post="/select-event/{{ event.id }}" hx-trigger="change"
+                           hx-target="#checkbox{{ event.id }}" hx-swap="outerHTML" id="checkbox{{ event.id }}"
+                           {% if event.selected %}checked{% endif %}>
+                </td>
             </tr>
         {% endfor %}
         </tbody>
