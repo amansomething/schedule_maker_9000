@@ -5,15 +5,18 @@ from typing import Optional
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+from django.http import HttpResponse
 from django.utils.timezone import activate, localtime
 from django.shortcuts import render, redirect
 from django.core.handlers.wsgi import WSGIRequest
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404
+from django.views.decorators.http import require_POST
 
 import httpx
 from bs4 import BeautifulSoup
 
-from .models import Event, Presenter, TableUpdate
+from .models import Event, Presenter, TableUpdate, SelectEvent
 
 BASE_URL = "https://us.pycon.org"
 SCHEDULES_URL = f"{BASE_URL}/2024/schedule/"
@@ -72,7 +75,8 @@ def get_context(request: WSGIRequest):
             "start_time": start_time.strftime("%I:%M %p"),
             "end_time": end_time.strftime("%I:%M %p"),
             "location": event.location,
-            "presenters": presenters_str
+            "presenters": presenters_str,
+            "selected": "checked" if SelectEvent.objects.filter(user=request.user, event=event).exists() else ""
         }
         try:
             all_events[day].append(event_info)
@@ -134,6 +138,9 @@ def download_schedule_data(links: list[str], output_dir: str = RESULTS_DIR) -> l
     :param output_dir: The directory to save the files to.
     """
     errors = []
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
     total = len(links)
     for i, link in enumerate(links):
         filename = link.split("/")[-2].strip() + ".html"
@@ -381,6 +388,21 @@ def select_events(request: WSGIRequest):
     # wed_events = Event.objects.filter(start_time__day=15).order_by('start_time')
 
     return render(request, "select_events.html", context=context)
+
+
+@require_POST
+def select_event(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+    user_event, created = SelectEvent.objects.get_or_create(user=request.user, event=event)
+
+    # Toggle the selection status
+    user_event.selected = not user_event.selected
+    user_event.save()
+
+    # Return a new checkbox based on the new selection status
+    checked_attribute = "checked" if user_event.selected else ""
+    html = f'<input type="checkbox" hx-post="/select-event/{event_id}" hx-trigger="change" hx-target="#checkbox{event_id}" hx-swap="outerHTML" id="checkbox{event_id}" {checked_attribute}>'
+    return HttpResponse(html)
 
 
 @login_required(login_url='/admin/login/?next=/home')

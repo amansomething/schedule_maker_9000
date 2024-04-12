@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Presenter, Event, TableUpdate
+from .models import Presenter, Event, TableUpdate, SelectEvent
 
 
 class TableUpdateAdmin(admin.ModelAdmin):
@@ -11,6 +11,11 @@ class EventAdmin(admin.ModelAdmin):
     list_display = ("title", "start_time", "end_time", "location")
 
 
+class SelectEventAdmin(admin.ModelAdmin):
+    list_display = ("user", "event")
+
+
 admin.site.register(Presenter)
 admin.site.register(Event, EventAdmin)
 admin.site.register(TableUpdate, TableUpdateAdmin)
+admin.site.register(SelectEvent)

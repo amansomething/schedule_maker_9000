@@ -27,6 +27,7 @@ class Event(models.Model):
 class SelectEvent(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    selected = models.BooleanField(default=False)
 
     class Meta:
         constraints = [
@@ -34,7 +35,7 @@ class SelectEvent(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.user.name} - {self.event.title}"
+        return f"User: {self.user} - Event:{self.event.title}"
 
 
 class TableUpdate(models.Model):

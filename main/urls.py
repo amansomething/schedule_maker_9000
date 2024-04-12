@@ -7,4 +7,5 @@ urlpatterns = [
     path("parse_data", views.parse_data, name="parse_data"),
     path("change_tz", views.change_tz, name="change_tz"),
     path("select_events", views.select_events, name="select_events"),
+    path("select-event/<int:event_id>", views.select_event, name="select_event"),
 ]
