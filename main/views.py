@@ -84,8 +84,11 @@ def get_context(request: WSGIRequest):
         except IndexError:
             print("Error: Day not found.")
 
+    all_selected_events = SelectEvent.objects.filter(user=request.user, selected=True)
+
     context = {
         "all_events": all_events,
+        "all_selected_events": all_selected_events,
         "events_exist": events_exist,
         "tzs": tzs,
         "common_tzs": common_tzs,
@@ -402,11 +405,21 @@ def select_event(request, event_id):
 
     # Return a new checkbox based on the new selection status
     checked_attribute = "checked" if user_event.selected else ""
-    html = f'''<input type="checkbox" hx-post="/select-event/{event_id}" hx-trigger="change"
+    html = f'''<input type="checkbox" hx-post="/select_event/{event_id}" hx-trigger="change"
                       hx-target="#event{event_id}" hx-swap="outerHTML"
                       id="event{event_id}" {checked_attribute}>'''
 
     return HttpResponse(html)
+
+
+@login_required(login_url='/admin/login/?next=/selected_events')
+def selected_events(request: WSGIRequest):
+    """
+    Loads the page where all selected events are shown.
+    """
+    context = get_context(request)
+
+    return render(request, "selected_events.html", context=context)
 
 
 @login_required(login_url='/admin/login/?next=/home')

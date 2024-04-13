@@ -1,0 +1,18 @@
+{% extends '_base.html' %}
+
+{% block content %}
+    <main>
+        <h2>Events Shower 9000</h2>
+        {% for event in all_selected_events %}
+            <h4>{{ event.event.title }}</h4>
+            <p>
+                {{ event.event.start_time.date }}:
+                {{ event.event.start_time.time }} - {{ event.event.end_time.time }}
+            </p>
+            <p>{{ event.event.location }}</p>
+            <p>{{ event.event.presenter_names }}</p>
+            <p>{{ event.event.description }}</p>
+            <hr>
+        {% endfor %}
+    </main>
+{% endblock content %}

@@ -36,7 +36,7 @@
                 <td>
                     <!-- Checkbox for selecting an event -->
                     <label for="event{{ event.id }}"></label>
-                    <input type="checkbox" hx-post="/select-event/{{ event.id }}" hx-trigger="change"
+                    <input type="checkbox" hx-post="/select_event/{{ event.id }}" hx-trigger="change"
                            hx-target="#event{{ event.id }}" hx-swap="outerHTML"
                            id="event{{ event.id }}" {{ event.selected }}>
                 </td>

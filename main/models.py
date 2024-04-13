@@ -23,6 +23,9 @@ class Event(models.Model):
     def __str__(self):
         return self.title
 
+    def presenter_names(self):
+        return ', '.join([presenter.name for presenter in self.presenters.all()])
+
 
 class SelectEvent(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
