@@ -76,7 +76,8 @@ def get_context(request: WSGIRequest):
             "end_time": end_time.strftime("%I:%M %p"),
             "location": event.location,
             "presenters": presenters_str,
-            "selected": "checked" if SelectEvent.objects.filter(user=request.user, event=event).exists() else ""
+            "selected": "checked" if SelectEvent.objects.filter(user=request.user, event=event,
+                                                                selected=True).exists() else ""
         }
         try:
             all_events[day].append(event_info)
@@ -401,7 +402,10 @@ def select_event(request, event_id):
 
     # Return a new checkbox based on the new selection status
     checked_attribute = "checked" if user_event.selected else ""
-    html = f'<input type="checkbox" hx-post="/select-event/{event_id}" hx-trigger="change" hx-target="#checkbox{event_id}" hx-swap="outerHTML" id="checkbox{event_id}" {checked_attribute}>'
+    html = f'''<input type="checkbox" hx-post="/select-event/{event_id}" hx-trigger="change"
+                      hx-target="#event{event_id}" hx-swap="outerHTML"
+                      id="event{event_id}" {checked_attribute}>'''
+
     return HttpResponse(html)
 
 

@@ -35,10 +35,10 @@
                 <td>{{ event.presenters }}</td>
                 <td>
                     <!-- Checkbox for selecting an event -->
-                    <label for="checkbox{{ event.id }}"></label>
+                    <label for="event{{ event.id }}"></label>
                     <input type="checkbox" hx-post="/select-event/{{ event.id }}" hx-trigger="change"
-                           hx-target="#checkbox{{ event.id }}" hx-swap="outerHTML"
-                           id="checkbox{{ event.id }}" {{ event.selected }}>
+                           hx-target="#event{{ event.id }}" hx-swap="outerHTML"
+                           id="event{{ event.id }}" {{ event.selected }}>
                 </td>
             </tr>
         {% endfor %}
