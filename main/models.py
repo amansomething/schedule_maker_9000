@@ -35,7 +35,7 @@ class SelectEvent(models.Model):
         ]
 
     def __str__(self):
-        return f"User: {self.user} - Event:{self.event.title}"
+        return f"{self.event.title} - {self.user}"
 
 
 class TableUpdate(models.Model):

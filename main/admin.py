@@ -12,10 +12,10 @@ class EventAdmin(admin.ModelAdmin):
 
 
 class SelectEventAdmin(admin.ModelAdmin):
-    list_display = ("user", "event")
+    list_display = ("user", "event", "selected")
 
 
 admin.site.register(Presenter)
 admin.site.register(Event, EventAdmin)
 admin.site.register(TableUpdate, TableUpdateAdmin)
-admin.site.register(SelectEvent)
+admin.site.register(SelectEvent, SelectEventAdmin)
