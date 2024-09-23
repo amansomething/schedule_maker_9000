@@ -1,14 +1,18 @@
 # schedule_maker_9000
 
-A placeholder repo for an app idea for DjangoCon 2024. I'd like to be able to pick my talks and have the app generate a
-schedule for me. Currently using the PyCon schedule to build out a proof of concept.
+An app idea for DjangoCon 2024. I'd like to be able to pick my talks and have the app generate a schedule for me.
+Initially I used BeautifulSoup and the PyCon schedule to build out a proof of concept. Then I realized 
+https://github.com/djangocon/2024.djangocon.us/ exists.
 
-This is very much a WIP and plenty of things are broken or incomplete. I don't have a fully articulated plan either.
-I'm just figuring it out as I go.
+Plenty of things are broken or incomplete. I didn't have as much to work on this as I thought.
+
+Having said all that, it kinda works now. I'd like to use this repo to build a better app over time.
 
 ## Setup
 
 - Create `.env` from example file.
+- Add the folder from https://github.com/djangocon/2024.djangocon.us/tree/main/src/_content/schedule/talks to the root
+  directory.
 - `docker compose up`
 - View at http://localhost:9000/
 

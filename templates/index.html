@@ -6,14 +6,10 @@
             <p>
                 No events found. Click <a href="{% url 'get_data' %}">Get Data</a> to get started.
             </p>
-            <p class="alert alert-warning">
-                Please be patient as the data is being fetched. It may take a few minutes.
-            </p>
         {% else %}
             <p>Data loaded. Check out the Select Events page.</p>
-            <p>Click <a href="{% url 'get_data' %}">Refresh Data</a> to get the latest schedule data.</p>
-            <p>DO NOT run "Refresh Data" too frequently. Maybe twice a day at most.</p>
-            <p>It downloads each presentation page locally for parsing.</p>
+            <p>Don't forget to select a timezone.</p>
+            <p>Click <a href="{% url 'get_data' %}">Refresh Data</a> to parse latest schedule data.</p>
         {% endif %}
     </main>
 {% endblock content %}

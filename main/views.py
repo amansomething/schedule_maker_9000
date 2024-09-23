@@ -1,5 +1,4 @@
 import os
-import re
 import zoneinfo
 from typing import Optional
 from datetime import datetime
@@ -13,14 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 
-import httpx
-from bs4 import BeautifulSoup
-
-from .models import Event, Presenter, TableUpdate, SelectEvent
-
-BASE_URL = "https://us.pycon.org"
-SCHEDULES_URL = f"{BASE_URL}/2024/schedule/"
-RESULTS_DIR = "site_data"
+from .models import Event, TableUpdate, SelectEvent
 
 
 def get_valid_tzs(request: WSGIRequest) -> tuple[list[str], list[str]]:
@@ -53,17 +45,12 @@ def get_context(request: WSGIRequest):
     current_tz = request.session.get("django_timezone", "UTC")
 
     all_events = {
+        "Monday": [],
+        "Tuesday": [],
         "Wednesday": [],
-        "Thursday": [],
-        "Friday": [],
-        "Saturday": [],
-        "Sunday": [],
     }
 
     for event in events_data:
-        presenters = event.presenters.all()
-        presenters_str = ", ".join([p.name for p in presenters])
-
         day = event.start_time.strftime("%A")
         start_time = localtime(event.start_time)
         end_time = localtime(event.end_time)
@@ -75,9 +62,9 @@ def get_context(request: WSGIRequest):
             "start_time": start_time.strftime("%I:%M %p"),
             "end_time": end_time.strftime("%I:%M %p"),
             "location": event.location,
-            "presenters": presenters_str,
-            "selected": "checked" if SelectEvent.objects.filter(user=request.user, event=event,
-                                                                selected=True).exists() else ""
+            "selected": "checked" if SelectEvent.objects.filter(
+                user=request.user, event=event, selected=True
+            ).exists() else ""
         }
         try:
             all_events[day].append(event_info)
@@ -97,79 +84,13 @@ def get_context(request: WSGIRequest):
     return context
 
 
-def read_html_file(file_path) -> Optional[BeautifulSoup]:
-    """
-    Reads the HTML file returns the contents as a soup object to be used by other functions.
-    """
-    try:
-        with open(file_path, 'r', encoding='utf-8') as file:
-            content = file.read()
-            soup = BeautifulSoup(content, 'html.parser')
-            return soup
-    except FileNotFoundError:
-        print(f"Error: File '{file_path}' not found.")
-        return None
-
-
-def get_all_schedule_links() -> list[str]:
-    """
-    Gets all the schedule links from the main schedule page.
-    Schedule links follow the pattern: /2024/schedule/presentation/{NUMBER}/
-
-    :return: A list of schedule links.
-    """
-    response = httpx.get(BASE_URL + "/2024/schedule/")
-    if response.status_code != 200:
-        return []
-
-    results = []
-    soup = BeautifulSoup(response.content, 'html.parser')
-
-    prefix = "/2024/schedule/presentation/"
-    for link in soup.find_all('a'):
-        href = link.get('href')
-        if href and href.startswith(prefix):
-            results.append(BASE_URL + href)
-
-    return results
-
-
-def download_schedule_data(links: list[str], output_dir: str = RESULTS_DIR) -> list[str]:
-    """
-    Downloads the schedule data from the given links and saves it to the given directory.
-
-    :param links: The links to the schedule data.
-    :param output_dir: The directory to save the files to.
-    """
-    errors = []
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-
-    total = len(links)
-    for i, link in enumerate(links):
-        filename = link.split("/")[-2].strip() + ".html"
-        print(f"Downloading {filename} ({i}/{total})")
-        response = httpx.get(link)
-
-        if response.status_code != 200:
-            errors.append(link)
-            continue
-
-        file_content_str = str(BeautifulSoup(response.content, 'html.parser'))
-        with open(f"{output_dir}/{filename}", 'w', encoding='utf-8') as file:
-            file.write(file_content_str)
-
-    return errors
-
-
 @login_required(login_url='/admin/login/?next=/get_data')
 def get_data(request: WSGIRequest) -> render:
     """
     Gets the latest data from the website and saves the results.
     If successful, also parses the data and fills the database.
     """
-    links = get_all_schedule_links()
-    errors = download_schedule_data(links)
+    errors = None
 
     if errors:
         message = errors
@@ -188,134 +109,6 @@ def get_data(request: WSGIRequest) -> render:
     return render(request, "index.html", context=context)
 
 
-def parse_time(time_str: str) -> datetime:
-    """
-    Helper function to parse the time string. Handles special values like "NOON".
-
-    :param time_str: The time string to parse. Expected format examples:
-        "2 PM", "2:30 PM", "NOON"
-    :return: A datetime object representing the time.
-    """
-    if time_str == "NOON":
-        time_str = "12 PM"
-
-    try:
-        result = datetime.strptime(time_str, "%I:%M %p")
-    except ValueError:
-        result = datetime.strptime(time_str, "%I %p")
-
-    return result
-
-
-def get_timestamps(day_str: str, time_str: str):
-    """
-    Parses the time string and returns the start and end times.
-    Must be within Wed-Sun.
-
-    :param day_str: The date string to parse. Expected format: "Wednesday"
-    :param time_str: The time string to parse. Expected format: "2 p.m.-2:30 p.m."
-    :return:
-    """
-    dates = {
-        "Wednesday": "2024-05-15",
-        "Thursday": "2024-05-16",
-        "Friday": "2024-05-17",
-        "Saturday": "2024-05-18",
-        "Sunday": "2024-05-19"
-    }
-
-    date_str = dates[day_str]
-    date_obj = datetime.strptime(date_str, "%Y-%m-%d")
-
-    start_time_str, end_time_str = tuple(x.upper() for x in time_str.replace(".", "").split("-"))
-
-    start_time = parse_time(start_time_str)
-    end_time = parse_time(end_time_str)
-
-    start_timestamp = date_obj.replace(hour=start_time.hour, minute=start_time.minute)
-    end_timestamp = date_obj.replace(hour=end_time.hour, minute=end_time.minute)
-
-    start_time = start_timestamp.replace(tzinfo=ZoneInfo("America/New_York"))
-    end_time = end_timestamp.replace(tzinfo=ZoneInfo("America/New_York"))
-
-    # print("Start Timestamp:", start_time)
-    # print("End Timestamp:", end_time)
-
-    return start_time, end_time
-
-
-def parse_schedule_data(soup: BeautifulSoup, event_id: int) -> Optional[list[str]]:
-    """
-    Parses the schedule data from the given soup object.
-    Adds the data to the database.
-
-    :param soup: The soup object containing the schedule data.
-    :param event_id: The ID of the scheduled event.
-    """
-    print(f"Parsing schedule data for: {event_id}.html")
-    panel_heading = soup.find("div", class_="panel-heading")
-    heading = panel_heading.find("h3").text
-    details = panel_heading.find("p").text
-
-    day, details = details.split(" - ")
-    event_times = details.split("2024 ")[1].split(" in")[0]
-
-    location = details.split("in ")[1]
-    # print("Details:", details)
-    # print('---')
-    # print("Day:", day)
-    # print("Time:", event_time)
-    # print("Location:", location)
-
-    start_time, end_time = get_timestamps(day, event_times)
-
-    panel_body = soup.find("div", class_="panel-body")
-    presenter_details = panel_body.find_all("a", href=re.compile(r"^/2024/speaker/profile"))
-    presenters = []
-    for detail in presenter_details:
-        # print("Detail:", detail)
-        presenter_name = detail.text
-        try:
-            presenter_link = detail["href"]
-        except TypeError:
-            continue
-
-        presenter_id = int(presenter_link.split("/")[-2])
-
-        Presenter.objects.get_or_create(
-            id=presenter_id,
-            defaults={
-                "name": presenter_name,
-                "bio": ""
-            }
-        )
-        presenters.append(presenter_id)
-
-    description = soup.find("div", class_="description").text
-
-    event, created = Event.objects.get_or_create(
-        id=event_id,
-        defaults={
-            "title": heading,
-            "description": description,
-            "start_time": start_time,
-            "end_time": end_time,
-            "location": location
-        }
-    )
-
-    errors = []
-
-    # Add the presenters to the event.
-    for presenter_id in presenters:
-        try:
-            event.presenters.add(presenter_id)
-        except ValueError:
-            errors.append(f"Error adding presenter {presenter_id} to event {event_id}")
-
-    return errors
-
-
 def parse_data(request: WSGIRequest) -> Optional[list[str]]:
     """
     Parses the latest schedule data for all files in the results directory.
@@ -324,36 +117,78 @@ def parse_data(request: WSGIRequest) -> Optional[list[str]]:
 
     # Clear out the existing tables
     Event.objects.all().delete()
-    Presenter.objects.all().delete()
 
-    files = [f for f in os.listdir(RESULTS_DIR) if f.endswith(".html")]
+    files = [f for f in os.listdir("talks") if f.endswith(".md")]
     if not files:
         print("Error: No files found in the results directory.")
         return errors
 
-    current_dir = os.path.abspath(RESULTS_DIR)
+    current_dir = os.path.abspath("talks")
 
-    # filename = "/code/site_data/20.html"
-    # print(f"Parsing schedule data for: {filename}")
-    # soup = read_html_file(filename)
-    # event_id = 20
-    # parse_schedule_data(soup, event_id)
+    events = []
 
     for file in files:
         filename = os.path.join(current_dir, file)
+        print(f"Parsing: {filename}")
         try:
-            event_id = int(file.split(".html")[0])
+            event_id = file.split(".md")[0]
         except ValueError:
-            event_id = 0
+            event_id = "0"
 
-        soup = read_html_file(filename)
-        error = parse_schedule_data(soup, event_id)
-        if error:
-            errors.extend(error)
+        dashes_count = 0
+        description = ""
+        start_time_str = ""
+        end_time_str = ""
+        title = ""
+        location = ""
 
-    # Update TableUpdate values with both Event and Presenter tables
+        with open(filename, "r") as f:
+            lines = f.readlines()
+
+            for i, line in enumerate(lines):
+                if line.strip() == "---":
+                    dashes_count += 1
+                    continue
+                if dashes_count == 2:
+                    description = "".join(lines[i+1:])
+                    break
+
+                if "start_datetime: " in line:
+                    start_time_str = line.split(": ")[1].strip()
+                elif "end_datetime: " in line:
+                    end_time_str = line.split(": ")[1].strip()
+                elif "title: " in line:
+                    title = line.split(": ")[1].strip()
+                elif "room: " in line:
+                    location = line.split(": ")[1].strip()
+
+
+        start_time = datetime.fromisoformat(start_time_str).replace(tzinfo=ZoneInfo("America/New_York"))
+        end_time = datetime.fromisoformat(end_time_str).replace(tzinfo=ZoneInfo("America/New_York"))
+
+        # print(f"Event ID: {event_id}")
+        # print(f"Title: {title}")
+        # print(f"Start Time: {start_time}")
+        # print(f"End Time: {end_time}")
+        # print("---\n")
+        # print("Description: ", description)
+
+        events.append(
+            Event(
+            id=event_id,
+            title=title,
+            description=description,
+            start_time=start_time,
+            end_time=end_time,
+            location=location
+        ))
+
+    # Note when event data was last updated
     TableUpdate.objects.update_or_create(table_name="Event")
-    TableUpdate.objects.update_or_create(table_name="Presenter")
+
+    # Bulk create events
+    if events:
+        Event.objects.bulk_create(events)
 
     if errors:
         print("Errors parsing schedule data:")
@@ -388,16 +223,13 @@ def select_events(request: WSGIRequest):
     Loads the page where all events are shown that can then be added to favorites.
     """
     context = get_context(request)
-
-    # wed_events = Event.objects.filter(start_time__day=15).order_by('start_time')
-
     return render(request, "select_events.html", context=context)
 
 
 @require_POST
 def select_event(request, event_id):
     event = get_object_or_404(Event, id=event_id)
-    user_event, created = SelectEvent.objects.get_or_create(user=request.user, event=event)
+    user_event, _ = SelectEvent.objects.get_or_create(user=request.user, event=event)
 
     # Toggle the selection status
     user_event.selected = not user_event.selected
