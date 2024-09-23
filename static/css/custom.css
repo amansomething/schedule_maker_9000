@@ -7,7 +7,7 @@ main {
     color: #fff;
 }
 
-nav a.active{
+nav a.active {
     background: #fff;
 }
 
@@ -21,7 +21,25 @@ nav a.active{
     margin-bottom: 50px;
 }
 
-.schedule-table caption{
+.schedule-table caption {
     font-size: 1.5em;
     text-align: center;
 }
+
+table#select-events td:first-of-type, table#select-events th:first-of-type {
+    width: 15%;
+}
+
+table#select-events td:nth-of-type(2), table#select-events th:nth-of-type(2) {
+    width: 70%;
+}
+
+table#select-events td:nth-of-type(3), table#select-events th:nth-of-type(3) {
+    width: 10%;
+}
+
+table#select-events td:last-of-type, table#select-events th:last-of-type {
+    width: 5%;
+}
+
+
