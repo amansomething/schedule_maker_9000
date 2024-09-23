@@ -7,6 +7,16 @@ https://github.com/djangocon/2024.djangocon.us/ exists.
 Plenty of things are broken or incomplete. I didn't have as much to work on this as I thought.
 
 Having said all that, it kinda works now. I'd like to use this repo to build a better app over time.
+TODO:
+- Add presenter info
+- Markdown rendering
+- Better styling
+- Better error handling
+- Grab the schedule automatically from the DjangoCon repo
+- Unselect events from the selected events page
+- Break down selected events by day
+- Clean up unused models
+- Organize views and templates better
 
 ## Setup
 
