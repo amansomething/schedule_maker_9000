@@ -71,7 +71,7 @@ def get_context(request: WSGIRequest):
         except IndexError:
             print("Error: Day not found.")
 
-    all_selected_events_raw = SelectEvent.objects.filter(user=request.user, selected=True)
+    all_selected_events_raw = SelectEvent.objects.filter(user=request.user, selected=True).order_by("event__start_time")
 
     all_selected_events = []
     for event in all_selected_events_raw:
