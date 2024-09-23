@@ -21,3 +21,9 @@ Having said all that, it kinda works now. I'd like to use this repo to build a b
 Helper snippet to generate passwords:
 
 `openssl rand -base64 128 | tr -d '/$\n' | head -c 64; echo`
+
+## Preview
+Select Events:
+![Select Events](static/img/select-events.png)
+Selected Events:
+![Selected Events](static/img/selected-events.png)
