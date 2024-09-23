@@ -2,17 +2,26 @@
 
 {% block content %}
     <main>
-        <h2>Events Shower 9000</h2>
-        {% for event in all_selected_events %}
-            <h4>{{ event.event.title }}</h4>
-            <p>
-                {{ event.event.start_time.date }}:
-                {{ event.event.start_time.time }} - {{ event.event.end_time.time }}
-            </p>
-            <p>{{ event.event.location }}</p>
-{#            <p>{{ event.event.presenter_names }}</p>#}
-            <p>{{ event.event.description }}</p>
-            <hr>
-        {% endfor %}
+        <h2>Selected Events Displayer 9000</h2>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Event</th>
+                <th>Day</th>
+                <th>Time</th>
+                <th>Location</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for event in all_selected_events %}
+                <tr>
+                    <td>{{ event.title }}</td>
+                    <td>{{ event.day }}</td>
+                    <td>{{ event.start_time }} - {{ event.end_time }}</td>
+                    <td>{{ event.location }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
     </main>
 {% endblock content %}

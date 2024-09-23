@@ -71,7 +71,21 @@ def get_context(request: WSGIRequest):
         except IndexError:
             print("Error: Day not found.")
 
-    all_selected_events = SelectEvent.objects.filter(user=request.user, selected=True)
+    all_selected_events_raw = SelectEvent.objects.filter(user=request.user, selected=True)
+
+    all_selected_events = []
+    for event in all_selected_events_raw:
+        e = event.event
+        event_info = {
+            "id": e.id,
+            "title": e.title,
+            "description": e.description,
+            "day": e.start_time.strftime("%A"),
+            "start_time": localtime(e.start_time).strftime("%I:%M %p"),
+            "end_time": localtime(e.end_time).strftime("%I:%M %p"),
+            "location": e.location,
+        }
+        all_selected_events.append(event_info)
 
     context = {
         "all_events": all_events,
@@ -87,7 +101,7 @@ def get_context(request: WSGIRequest):
 @login_required(login_url='/admin/login/?next=/get_data')
 def get_data(request: WSGIRequest) -> render:
     """
-    Gets the latest data from the website and saves the results.
+    Gets the latest data from talks folder saves the results.
     If successful, also parses the data and fills the database.
     """
     errors = None
@@ -111,7 +125,7 @@ def get_data(request: WSGIRequest) -> render:
 
 def parse_data(request: WSGIRequest) -> Optional[list[str]]:
     """
-    Parses the latest schedule data for all files in the results directory.
+    Parses the latest schedule data for all files in the talks directory.
     """
     errors = []
 
