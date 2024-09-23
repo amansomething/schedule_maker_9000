@@ -172,7 +172,7 @@ def parse_data(request: WSGIRequest) -> Optional[list[str]]:
                 elif "end_datetime: " in line:
                     end_time_str = line.split(": ")[1].strip()
                 elif "title: " in line:
-                    title = line.split(": ")[1].strip()
+                    title = line.split("title: ")[1].strip().replace("'", "").replace('"', "")
                 elif "room: " in line:
                     location = line.split(": ")[1].strip()
 
