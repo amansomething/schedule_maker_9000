@@ -21,9 +21,10 @@ TODO:
 ## Setup
 
 - Create `.env` from example file.
-- Add the folder from https://github.com/djangocon/2024.djangocon.us/tree/main/src/_content/schedule/talks to the root
-  directory.
-- `docker compose up`
+- Add these folders to the root directory:
+  - https://github.com/djangocon/2024.djangocon.us/tree/main/src/_content/schedule/talks
+  - https://github.com/djangocon/2024.djangocon.us/tree/main/src/_content/presenters
+- Run `docker compose up`
 - View at http://localhost:9000/
 
 ## Notes

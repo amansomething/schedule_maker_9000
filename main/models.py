@@ -17,14 +17,14 @@ class Event(models.Model):
     description = models.TextField()
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
-    # presenters = models.ManyToManyField(Presenter)
+    presenters = models.ManyToManyField(Presenter, blank=True)
     location = models.CharField(max_length=255)
 
     def __str__(self):
         return self.title
 
-    # def presenter_names(self):
-    #     return ', '.join([presenter.name for presenter in self.presenters.all()])
+    def presenter_names(self):
+        return ', '.join([presenter.name for presenter in self.presenters.all()])
 
 
 class SelectEvent(models.Model):

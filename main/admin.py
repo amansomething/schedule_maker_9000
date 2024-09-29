@@ -8,7 +8,7 @@ class TableUpdateAdmin(admin.ModelAdmin):
 
 
 class EventAdmin(admin.ModelAdmin):
-    list_display = ("title", "start_time", "end_time", "location")
+    list_display = ("title", "start_time", "end_time", "location", "presenter_names")
 
 
 class SelectEventAdmin(admin.ModelAdmin):
