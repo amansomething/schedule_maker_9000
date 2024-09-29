@@ -15,7 +15,10 @@
             <tbody>
             {% for event in all_selected_events %}
                 <tr>
-                    <td>{{ event.title }}</td>
+                    <td>
+                        <b>{{ event.title }}</b><br>
+                        <i>Presenters: {{ event.presenters }}</i>
+                    </td>
                     <td>{{ event.day }}</td>
                     <td>{{ event.start_time }} - {{ event.end_time }}</td>
                     <td>{{ event.location }}</td>

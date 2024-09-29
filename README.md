@@ -8,7 +8,7 @@ Plenty of things are broken or incomplete. I didn't have as much to work on this
 
 Having said all that, it kinda works now. I'd like to use this repo to build a better app over time.
 TODO:
-- Add presenter info
+~~- Add presenter info~~
 - Markdown rendering
 - Better styling
 - Better error handling

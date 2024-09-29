@@ -23,6 +23,7 @@ class Event(models.Model):
     def __str__(self):
         return self.title
 
+    @property
     def presenter_names(self):
         return ", ".join([presenter.name for presenter in self.presenters.all()])
 

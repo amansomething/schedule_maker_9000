@@ -15,44 +15,79 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Presenter',
+            name="Presenter",
             fields=[
-                ('id', models.CharField(max_length=255, primary_key=True, serialize=False)),
-                ('name', models.CharField(max_length=255)),
-                ('bio', models.TextField(blank=True, null=True)),
+                (
+                    "id",
+                    models.CharField(max_length=255, primary_key=True, serialize=False),
+                ),
+                ("name", models.CharField(max_length=255)),
+                ("bio", models.TextField(blank=True, null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='TableUpdate',
+            name="TableUpdate",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('table_name', models.CharField(max_length=255)),
-                ('last_updated', models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("table_name", models.CharField(max_length=255)),
+                ("last_updated", models.DateTimeField(auto_now=True)),
             ],
         ),
         migrations.CreateModel(
-            name='Event',
+            name="Event",
             fields=[
-                ('id', models.CharField(max_length=255, primary_key=True, serialize=False)),
-                ('title', models.CharField(max_length=255)),
-                ('description', models.TextField(blank=True, null=True)),
-                ('start_time', models.DateTimeField()),
-                ('end_time', models.DateTimeField()),
-                ('location', models.CharField(max_length=255)),
-                ('presenters', models.ManyToManyField(blank=True, to='main.presenter')),
+                (
+                    "id",
+                    models.CharField(max_length=255, primary_key=True, serialize=False),
+                ),
+                ("title", models.CharField(max_length=255)),
+                ("description", models.TextField(blank=True, null=True)),
+                ("start_time", models.DateTimeField()),
+                ("end_time", models.DateTimeField()),
+                ("location", models.CharField(max_length=255)),
+                ("presenters", models.ManyToManyField(blank=True, to="main.presenter")),
             ],
         ),
         migrations.CreateModel(
-            name='SelectEvent',
+            name="SelectEvent",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('selected', models.BooleanField(default=False)),
-                ('event', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='main.event')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("selected", models.BooleanField(default=False)),
+                (
+                    "event",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="main.event"
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.AddConstraint(
-            model_name='selectevent',
-            constraint=models.UniqueConstraint(fields=('user', 'event'), name='unique_user_event'),
+            model_name="selectevent",
+            constraint=models.UniqueConstraint(
+                fields=("user", "event"), name="unique_user_event"
+            ),
         ),
     ]

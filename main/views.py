@@ -67,6 +67,7 @@ def get_context(request: WSGIRequest):
             "start_time": start_time.strftime("%I:%M %p"),
             "end_time": end_time.strftime("%I:%M %p"),
             "location": event.location,
+            "presenters": event.presenter_names or "-",
             "selected": (
                 "checked"
                 if SelectEvent.objects.filter(
@@ -95,6 +96,7 @@ def get_context(request: WSGIRequest):
             "start_time": localtime(e.start_time).strftime("%I:%M %p"),
             "end_time": localtime(e.end_time).strftime("%I:%M %p"),
             "location": e.location,
+            "presenters": e.presenter_names,
         }
         all_selected_events.append(event_info)
 
@@ -224,6 +226,7 @@ def parse_event_data(events_dir: str = "talks") -> list:
         return ["Error: No files found in the talks directory."]
 
     events = []
+    event_presenter_map = []
     for file in files:
         try:
             event_id = file.split(".md")[0]
@@ -241,6 +244,7 @@ def parse_event_data(events_dir: str = "talks") -> list:
                 start_time = attributes.get("start_datetime", "ERROR")
                 end_time = attributes.get("end_datetime", "ERROR")
                 location = attributes.get("room", "ERROR")
+                presenter_slugs = attributes.get("presenter_slugs", [])
                 try:
                     description = next(data)
                 except Exception as e:
@@ -257,20 +261,27 @@ def parse_event_data(events_dir: str = "talks") -> list:
         start_time = start_time.replace(tzinfo=ZoneInfo("America/New_York"))
         end_time = end_time.replace(tzinfo=ZoneInfo("America/New_York"))
 
-        events.append(
-            Event(
-                id=event_id,
-                title=title,
-                description=description,
-                start_time=start_time,
-                end_time=end_time,
-                location=location,
-            )
+        event = Event(
+            id=event_id,
+            title=title,
+            description=description,
+            start_time=start_time,
+            end_time=end_time,
+            location=location,
         )
+        events.append(event)
+        event_presenter_map.append((event, presenter_slugs))
 
     if events:
         Event.objects.all().delete()
         Event.objects.bulk_create(events)
+
+        for event, presenter_slugs in event_presenter_map:
+            presenters = Presenter.objects.filter(
+                id__in=presenter_slugs
+            )  # Fetch all presenters at once
+            event.presenters.add(*presenters)  # Add multiple presenters to the event
+
         TableUpdate.objects.update_or_create(table_name="EventsExist")
     else:
         errors.append("Error: No event data found.")
