@@ -3,7 +3,7 @@ from django.db import models
 
 
 class Presenter(models.Model):
-    id = models.IntegerField(primary_key=True)
+    id = models.CharField(primary_key=True, max_length=255)
     name = models.CharField(max_length=255)
     bio = models.TextField(null=True, blank=True)
 
@@ -12,9 +12,9 @@ class Presenter(models.Model):
 
 
 class Event(models.Model):
-    id = models.TextField(primary_key=True)
+    id = models.CharField(primary_key=True, max_length=255)
     title = models.CharField(max_length=255)
-    description = models.TextField()
+    description = models.TextField(null=True, blank=True)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     presenters = models.ManyToManyField(Presenter, blank=True)
@@ -24,7 +24,7 @@ class Event(models.Model):
         return self.title
 
     def presenter_names(self):
-        return ', '.join([presenter.name for presenter in self.presenters.all()])
+        return ", ".join([presenter.name for presenter in self.presenters.all()])
 
 
 class SelectEvent(models.Model):
@@ -34,7 +34,7 @@ class SelectEvent(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['user', 'event'], name='unique_user_event')
+            models.UniqueConstraint(fields=["user", "event"], name="unique_user_event")
         ]
 
     def __str__(self):
